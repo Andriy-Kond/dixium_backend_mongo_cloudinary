@@ -7,7 +7,9 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 import multer from "multer";
 import cloudinary from "./cloudinaryConfig.js";
-import { Game } from "./models/Game.js";
+import { Game } from "./models/gameModel.js";
+
+const { DB_HOST, PORT: port = 3000, SECRET_KEY } = process.env;
 
 const app = express();
 const httpServer = createServer(app);
@@ -15,13 +17,17 @@ const io = new Server(httpServer, { cors: { origin: "*" } });
 
 app.use(cors());
 app.use(express.json());
+app.use(express.static("public"));
 
 mongoose
-  .connect(process.env.DB_HOST)
-  .then(() => console.log("MongoDB connected"))
-  .catch(error => console.log(error.message));
-
-const { SECRET_KEY } = process.env;
+  .connect(DB_HOST)
+  .then(() => {
+    console.log("MongoDB connected");
+  })
+  .catch(error => {
+    console.log(error.message);
+    process.exit(1);
+  });
 
 // Генерація JWT токена
 const generateToken = userId =>
@@ -89,4 +95,4 @@ io.on("connection", socket => {
   });
 });
 
-httpServer.listen(3001, () => console.log("Server running on port 3001"));
+httpServer.listen(port, () => console.log(`Server running on port ${port}`));

@@ -24,7 +24,7 @@ export const authenticate = async (req, res, next) => {
       // next(HttpError({ status: 401, message: "User not found" }));
       next(HttpError({ status: 401 }));
 
-    // Object "req" is one for one request. For example for request contactsRouter.post("/", authenticate, checkErrorJoiSchemaDecorator(joiContactSchemas.addContact), contactsController.addContact) it will be ths same in authenticate, checkErrorJoiSchemaDecorator and contactsController.
+    // Object "req" is one for one request. For example for request contactsRouter.post("/", authenticate, checkErrorJoiSchemaDecorator(joiContactSchemas.addContact), contactsController.addContact) it will be the same in authenticate, checkErrorJoiSchemaDecorator and contactsController.
     req.user = user; // For adding identification of this user in contactController.addContact() or other places
 
     next();
