@@ -1,7 +1,7 @@
 import { createServer } from "http";
 import { Server } from "socket.io";
-import { app } from "./app";
-import { Game } from "./models/gameModel";
+import { app } from "./app.js";
+import { Game } from "./models/gameModel.js";
 
 export const httpServer = createServer(app);
 const io = new Server(httpServer, { cors: { origin: "*" } });

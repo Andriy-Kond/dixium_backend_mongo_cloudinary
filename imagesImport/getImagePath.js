@@ -1,13 +1,18 @@
 //% 1. Отримання списку файлів у теці(наприклад, deck_01)
-const cloudinary = require("cloudinary").v2;
+import "dotenv/config";
+import { v2 as cloudinary } from "cloudinary";
 
+const { CLOUD_NAME, CLOUD_API_KEY, CLOUD_API_SECRET } = process.env;
 cloudinary.config({
-  cloud_name: "your_cloud_name",
-  api_key: "your_api_key",
-  api_secret: "your_api_secret",
+  cloud_name: CLOUD_NAME,
+  api_key: CLOUD_API_KEY,
+  api_secret: CLOUD_API_SECRET,
+  secure: true,
 });
 
-export async function getImagesFromFolder(folderName) {
+// import { cloudinary } from "./cloudinaryConfig";
+
+export async function getImagePath(folderName) {
   const response = await cloudinary.api.resources({
     type: "upload",
     prefix: folderName + "/", // Отримати всі файли у теці
@@ -21,7 +26,7 @@ export async function getImagesFromFolder(folderName) {
 }
 
 // Використання
-// getImagesFromFolder("deck_01").then(console.log).catch(console.error);
+// getImagesFromCloudinaryFolder("deck_01").then(console.log).catch(console.error);
 
 // result:
 // [
@@ -38,7 +43,7 @@ export async function getImagesFromFolder(folderName) {
 //% 2. Використання колекцій (Collections) у Cloudinary
 // Cloudinary API не надає прямого способу отримати список файлів з Collection (тільки теги або папки). Однак, якщо ти додаєш усі файли колекції у спільний тег, ти можеш отримати список файлів за тегом.
 // Отримати всі файли з тегом deck_01:
-// async function getImagesByTag(tag) {
+// async function getImagesByCloudinaryTag(tag) {
 //   const response = await cloudinary.api.resources_by_tag(tag);
 
 //   return response.resources.map(file => ({
@@ -48,4 +53,4 @@ export async function getImagesFromFolder(folderName) {
 // }
 
 // Використання
-// getImagesByTag("deck_01").then(console.log).catch(console.error);
+// getImagesByCloudinaryTag("deck_01").then(console.log).catch(console.error);

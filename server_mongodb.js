@@ -6,7 +6,7 @@ import mongoose from "mongoose";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import multer from "multer";
-import cloudinary from "./cloudinaryConfig.js";
+import cloudinary from "./admin/cloudinaryToMongoImagesPaths/cloudinaryConfig.js";
 import { Game } from "./models/gameModel.js";
 
 const { DB_HOST, PORT: port = 3000, SECRET_KEY } = process.env;

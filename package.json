@@ -2,6 +2,7 @@
   "name": "dixium_backend_mongo_cloudinary",
   "version": "1.0.0",
   "main": "server.js",
+  "type": "module",
   "scripts": {
     "start": "cross-env NODE_ENV=production node server.js",
     "dev": "cross-env NODE_ENV=development nodemon server.js",
@@ -22,7 +23,7 @@
     "gravatar": "^1.8.2",
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.9.2",
+    "mongoose": "^8.10.0",
     "multer": "^1.4.5-lts.1",
     "nanoid": "^5.0.9",
     "nodemon": "^3.1.7",

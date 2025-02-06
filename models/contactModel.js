@@ -1,8 +1,8 @@
 import { Schema, model } from "mongoose";
 
 import Joi from "joi";
-import { handleMongooseError } from "../utils/handleMongooseError.js";
 import validator from "validator";
+import { handleMongooseError } from "../utils/handleMongooseError.js";
 
 const { isLength } = validator;
 
