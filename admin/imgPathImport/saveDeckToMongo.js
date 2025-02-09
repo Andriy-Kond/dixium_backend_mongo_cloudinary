@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { HttpError } from "../utils/HttpError.js";
+import { HttpError } from "../../utils/HttpError.js";
 
 const DeckSchema = new mongoose.Schema({
   name: String,

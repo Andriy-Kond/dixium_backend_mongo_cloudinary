@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import { httpServer } from "./server_socket_io.js";
 
 // import { saveDeckToMongo } from "./imagesImport/saveDeckToMongo.js";
-import { imgPathImport } from "./imagesImport/imgPathImport.js";
+// import { imgPathImport } from "./admin/imgPathImport/imgPathImport.js";
 
 const { DB_HOST, PORT: port = 3000 } = process.env;
 
