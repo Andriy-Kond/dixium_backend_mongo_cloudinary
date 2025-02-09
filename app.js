@@ -1,9 +1,10 @@
 //* Server MongoDB + Socket.io
 
+// import { contactsRouter } from "./routes/api/contactsRouter.js";
 import express from "express";
 import cors from "cors";
-import { contactsRouter } from "./routes/api/contactsRouter.js";
 import { authRouter } from "./routes/api/authRouter.js";
+import { gameRouter } from "./routes/api/gameRouter.js";
 
 export const app = express();
 
@@ -11,8 +12,9 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static("public"));
 
-app.use("/api/contacts", contactsRouter);
+// app.use("/api/contacts", contactsRouter);
 app.use("/api/auth", authRouter);
+app.use("/dixium/desks", gameRouter);
 
 app.use("/", (req, res, next) => {
   res.status(404).json({ message: "Not found route" });

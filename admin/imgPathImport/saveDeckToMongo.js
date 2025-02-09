@@ -1,10 +1,13 @@
 import mongoose from "mongoose";
 import { HttpError } from "../../utils/HttpError.js";
 
-const DeckSchema = new mongoose.Schema({
-  name: String,
-  cards: [{ public_id: String, url: String }],
-});
+const DeckSchema = new mongoose.Schema(
+  {
+    name: String,
+    cards: [{ public_id: String, url: String }],
+  },
+  { versionKey: false, timestamps: true },
+);
 
 const Deck = mongoose.model("Deck", DeckSchema);
 

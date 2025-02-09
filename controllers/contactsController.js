@@ -12,17 +12,17 @@ const getContacts = async (req, res, next) => {
   const { _id: owner } = req.user;
 
   //~ If necessary insert only id to field "owner":
-  // const contacts = await Contact.find({ owner }, "-createdAt -updatedAt"); // Finds items of current owner
+  const contacts5 = await Contact.find({ owner }, "-createdAt -updatedAt"); // Finds items of current owner
 
   //~ If necessary insert detailed info of user to field "owner" (for example, to avoid making multiple queries to the database) needs add .populate():
-  const contacts5 = await Contact.find(
+  const contacts6 = await Contact.find(
     { owner },
     "-createdAt -updatedAt",
   ).populate("owner", "name email");
   // will go to mongoose model "contactModel", will find field owner, will take id from field "type" (Schema.Types.ObjectId), will find collection in ref ("user"), will find object with  id from Schema.Types.ObjectId in collection "user", and insert this object to field "owner".
   // Second argument indicate what fields needs to insert (name and email). Without this option will return full object with all fields.
 
-  //~ If need use patination
+  //~ If need use pagination
   // req.query contains search params (for example, page and limit for pagination)
   const { page = 1, limit = 10 } = req.query;
 

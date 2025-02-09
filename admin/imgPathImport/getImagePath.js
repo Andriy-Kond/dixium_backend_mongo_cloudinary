@@ -1,4 +1,5 @@
 //% 1. Отримання списку файлів у теці(наприклад, deck_01)
+// import { cloudinary } from "./cloudinaryConfig";
 import "dotenv/config";
 import { v2 as cloudinary } from "cloudinary";
 
@@ -9,8 +10,6 @@ cloudinary.config({
   api_secret: CLOUD_API_SECRET,
   secure: true,
 });
-
-// import { cloudinary } from "./cloudinaryConfig";
 
 export async function getImagePath(folderName) {
   const response = await cloudinary.api.resources({
