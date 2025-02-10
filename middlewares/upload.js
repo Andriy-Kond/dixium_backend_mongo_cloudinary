@@ -5,9 +5,9 @@ import path from "path";
 
 // First of all you need put files into temp folder. Where this file will then be moved will be decided in the authController
 const __dirname = import.meta.dirname; // here it is path to "middlewares" folder
-console.log("__dirname:::", __dirname);
+// console.log("__dirname:::", __dirname);
 const tempDir = path.join(__dirname, "../", "temp");
-console.log("tempDir:::", tempDir);
+// console.log("tempDir:::", tempDir);
 
 // Settings object for middleware multer:
 // const upload = multer({ dest: "uploads/" });

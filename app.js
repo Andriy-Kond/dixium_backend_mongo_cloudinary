@@ -4,7 +4,7 @@
 import express from "express";
 import cors from "cors";
 import { authRouter } from "./routes/api/authRouter.js";
-import { gameRouter } from "./routes/api/gameRouter.js";
+import { deskRouter } from "./routes/api/deskRouter.js";
 
 export const app = express();
 
@@ -14,7 +14,7 @@ app.use(express.static("public"));
 
 // app.use("/api/contacts", contactsRouter);
 app.use("/api/auth", authRouter);
-app.use("/dixium/desks", gameRouter);
+app.use("/dixium/decks", deskRouter);
 
 app.use("/", (req, res, next) => {
   res.status(404).json({ message: "Not found route" });
