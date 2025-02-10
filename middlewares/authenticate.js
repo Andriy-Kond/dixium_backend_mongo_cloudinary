@@ -6,11 +6,12 @@ import { User } from "../models/userModel.js";
 const { SECRET_KEY } = process.env;
 
 export const authenticate = async (req, res, next) => {
+  console.log("start authenticate :>> ");
   const { authorization = "" } = req.headers;
   const [bearer, token] = authorization.split(" ");
 
   if (bearer !== "Bearer") {
-    next(HttpError({ status: 401, message: "Unauthorized" }));
+    next(HttpError({ status: 401, message: "Unauthorized - no 'Bearer'" }));
   }
 
   try {

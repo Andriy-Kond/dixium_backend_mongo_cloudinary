@@ -1,7 +1,7 @@
 import { Deck } from "../models/deckModel.js";
 import { tryCatchDecorator } from "../utils/tryCatchDecorator.js";
 
-const getDecks = async (req, res, next) => {
+const getDecks = async (req, res) => {
   // console.log("start getDecks");
   const decks = await Deck.find();
   // console.log("getDecks >> decks:::", decks);
@@ -9,7 +9,7 @@ const getDecks = async (req, res, next) => {
   res.json(decks);
 };
 
-const getCurrentDeck = async (req, res, next) => {
+const getCurrentDeck = async (req, res) => {
   console.log("start get current deck");
   console.log("req.params :>> ", req.params);
   console.log(" req.body :>> ", req.body);
