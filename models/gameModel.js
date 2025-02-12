@@ -3,9 +3,18 @@ import { handleMongooseError } from "../utils/handleMongooseError.js";
 
 const GameSchema = new Schema(
   {
-    name: String,
+    gameName: String,
     players: [{ userId: String, name: String, avatar: String }],
-    cards: [{ public_id: String, url: String }],
+    deck: [
+      {
+        cardName: String,
+        public_id: String,
+        url: String,
+        _id: Schema.Types.ObjectId,
+      },
+    ],
+    startGame: Boolean,
+    hostPlayer: Schema.Types.ObjectId,
   },
 
   { versionKey: false, timestamps: true },

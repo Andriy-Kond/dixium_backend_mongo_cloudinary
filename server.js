@@ -2,7 +2,7 @@ import "dotenv/config";
 import mongoose from "mongoose";
 import { httpServer } from "./server_socket_io.js";
 
-// import { imgPathImport } from "./admin/imgPathImport/imgPathImport.js";
+import { imgPathImport } from "./admin/imgPathImport/imgPathImport.js";
 
 const { DB_HOST, PORT: port = 3000 } = process.env;
 
