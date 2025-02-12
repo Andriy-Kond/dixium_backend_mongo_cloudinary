@@ -45,6 +45,7 @@ const register = async (req, res) => {
     email: newUser.email,
     name: newUser.name,
     token: newUser.token,
+    userId: newUser._id,
   });
 };
 
@@ -70,7 +71,12 @@ const login = async (req, res, next) => {
   const token = jwt.sign({ id: user._id }, SECRET_KEY, { expiresIn: "23h" });
   await User.findByIdAndUpdate(user._id, { token });
 
-  res.json({ token });
+  res.json({
+    email: user.email,
+    name: user.name,
+    token,
+    userId: user._id,
+  });
 };
 
 // Check whether token is still valid and send name&email
