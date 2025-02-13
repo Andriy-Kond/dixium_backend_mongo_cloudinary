@@ -1,7 +1,7 @@
 import { Deck } from "../models/deckModel.js";
 import { tryCatchDecorator } from "../utils/tryCatchDecorator.js";
 
-const getDecks = async (req, res) => {
+const getAllDecks = async (req, res) => {
   // console.log("start getDecks");
   const decks = await Deck.find();
   // console.log("getDecks >> decks:::", decks);
@@ -21,6 +21,6 @@ const getCurrentDeck = async (req, res) => {
 };
 
 export const deckController = {
-  getDecks: tryCatchDecorator(getDecks),
+  getAllDecks: tryCatchDecorator(getAllDecks),
   getCurrentDeck: tryCatchDecorator(getCurrentDeck),
 };

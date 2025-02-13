@@ -32,9 +32,10 @@ const generateGameName = () => {
   return gameName;
 };
 
-const getGames = async (req, res) => {
+const getAllGames = async (req, res) => {
   console.log("get all games");
   const games = await Game.find();
+  console.log("getAllGames >> games:::", games);
 
   res.json(games);
 };
@@ -51,6 +52,6 @@ const createGame = async (req, res) => {
 };
 
 export const gameController = {
-  getGames: tryCatchDecorator(getGames),
+  getAllGames: tryCatchDecorator(getAllGames),
   createGame: tryCatchDecorator(createGame),
 };

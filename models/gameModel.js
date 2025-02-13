@@ -13,7 +13,7 @@ const GameSchema = new Schema(
         _id: Schema.Types.ObjectId,
       },
     ],
-    startGame: Boolean,
+    isGameStarted: Boolean,
     hostPlayer: Schema.Types.ObjectId,
   },
 
