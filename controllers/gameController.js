@@ -35,17 +35,17 @@ const generateGameName = () => {
 const getAllGames = async (req, res) => {
   console.log("get all games");
   const games = await Game.find();
-  console.log("getAllGames >> games:::", games);
+  // console.log("getAllGames >> games:::", games);
 
   res.json(games);
 };
 
 const createGame = async (req, res) => {
   console.log("creating new game");
-  console.log("createGame >> req.body:::", req.body);
+
   const newGame = await Game.create(req.body);
   newGame.gameName = generateGameName();
-
+  newGame.gameTitle = getRandomItem(newGame.deck).url;
   await newGame.save();
 
   res.status(201).json(newGame);

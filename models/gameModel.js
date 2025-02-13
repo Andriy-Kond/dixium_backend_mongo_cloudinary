@@ -14,7 +14,9 @@ const GameSchema = new Schema(
       },
     ],
     isGameStarted: Boolean,
-    hostPlayer: Schema.Types.ObjectId,
+    hostPlayerId: Schema.Types.ObjectId,
+    hostPlayerName: String,
+    gameTitle: String,
   },
 
   { versionKey: false, timestamps: true },
