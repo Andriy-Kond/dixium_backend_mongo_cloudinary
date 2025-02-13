@@ -43,10 +43,15 @@ const getAllGames = async (req, res) => {
 const createGame = async (req, res) => {
   console.log("creating new game");
 
-  const newGame = await Game.create(req.body);
+  // const newGame = await Game.create(req.body); // First db query
+  // newGame.gameName = generateGameName();
+  // newGame.gameTitle = getRandomItem(newGame.deck).url;
+  // await newGame.save(); // Second db query
+
+  const newGame = new Game(req.body);
   newGame.gameName = generateGameName();
   newGame.gameTitle = getRandomItem(newGame.deck).url;
-  await newGame.save();
+  await newGame.save(); // One single db query
 
   res.status(201).json(newGame);
 };
