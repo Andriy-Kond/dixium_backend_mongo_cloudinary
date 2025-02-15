@@ -3,16 +3,17 @@ import { handleMongooseError } from "../utils/handleMongooseError.js";
 
 const GameSchema = new Schema(
   {
-    gameName: String,
-    players: [{ userId: String, name: String, avatar: String }],
+    gameName: String, // Game name
+    players: [{ userId: String, name: String, avatar: String }], // List of players
     deck: [
       {
         cardName: String,
-        public_id: String,
-        url: String,
-        _id: Schema.Types.ObjectId,
+        public_id: String, // Public card id from Cloudinary
+        url: String, // Card url from Cloudinary
+        _id: Schema.Types.ObjectId, // Card id from MongoDB (like owner)
       },
-    ],
+    ], // Deck of cards
+    startGame: Boolean, // Triggers when
     isGameStarted: Boolean,
     hostPlayerId: Schema.Types.ObjectId,
     hostPlayerName: String,
