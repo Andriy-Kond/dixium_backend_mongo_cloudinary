@@ -28,10 +28,19 @@ const createGame = async (req, res) => {
   // opt.2.1
   const newGame = await createNewGame(req.body);
 
-  res.status(201).json(newGame);
+  res.status(200).json(newGame);
+};
+
+const removeGame = async (req, res) => {
+  console.log("removeGame >> req:::", req);
+  console.log("removeGame >> req.body:::", req.body);
+  const deletedGame = await Game.findByIdAndDelete(req.params.id);
+  console.log("removeGame >> deletedGame:::", deletedGame);
+  res.status(201).json(deletedGame);
 };
 
 export const gameController = {
   getAllGames: tryCatchDecorator(getAllGames),
   createGame: tryCatchDecorator(createGame),
+  removeGame: tryCatchDecorator(removeGame),
 };
