@@ -13,7 +13,7 @@ io.on("connection", socket => {
   // Обробка створення нової гри (Гравець створює гру)
   socket.on("createGame", async gameData => {
     try {
-      createNewGame(gameData);
+      const newGame = await createNewGame(gameData);
 
       // Оповіщення всіх під'єднаних клієнтів про створену гру
       io.emit("newGameCreated", newGame); // Надсилаємо ВСІМ (.emit) оновлений список ігор

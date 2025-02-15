@@ -22,6 +22,7 @@ const generateGameName = () => {
 };
 
 export const createNewGame = async gameData => {
+  console.log("Creating New Game:::");
   const newGame = new Game(gameData);
   newGame.gameName = generateGameName();
   newGame.gameTitle = getRandomItem(newGame.deck).url;
