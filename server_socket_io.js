@@ -7,6 +7,16 @@ import { createNewGame } from "./services/gameService.js";
 export const httpServer = createServer(app);
 const io = new Server(httpServer, { cors: { origin: "*" } });
 
+// Відстежуємо зміни в колекції
+const changeStream = Game.watch();
+
+changeStream.on("change", change => {
+  console.log("Зміни в БД:", change);
+  if (change.operationType === "delete") {
+    io.emit("dbUpdate", change); // Надсилаємо подію клієнтам лише при видаленні
+  }
+});
+
 io.on("connection", socket => {
   console.log(`User connected: ${socket.id}`);
 
