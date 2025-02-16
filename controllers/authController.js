@@ -81,9 +81,9 @@ const login = async (req, res, next) => {
 
 // Check whether token is still valid and send name&email
 const getCurrentUser = (req, res) => {
-  const { email, name } = req.user;
+  const { email, name, avatarURL } = req.user;
 
-  res.json({ email, name });
+  res.json({ email, name, avatarURL });
 };
 
 const logout = async (req, res) => {

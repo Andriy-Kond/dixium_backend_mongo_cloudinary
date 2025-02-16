@@ -32,10 +32,7 @@ const createGame = async (req, res) => {
 };
 
 const removeGame = async (req, res) => {
-  console.log("removeGame >> req:::", req);
-  console.log("removeGame >> req.body:::", req.body);
   const deletedGame = await Game.findByIdAndDelete(req.params.id);
-  console.log("removeGame >> deletedGame:::", deletedGame);
   res.status(201).json(deletedGame);
 };
 

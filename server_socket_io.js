@@ -7,13 +7,13 @@ import { createNewGame } from "./services/gameService.js";
 export const httpServer = createServer(app);
 const io = new Server(httpServer, { cors: { origin: "*" } });
 
-// Відстежуємо зміни в колекції
+// Use Stream of MongoDB
+// Tracking changes the Game-collection in mongodb
 const changeStream = Game.watch();
-
 changeStream.on("change", change => {
-  console.log("Зміни в БД:", change);
+  console.log("Зміни в БД");
+  io.emit("dbUpdate", change); // Надсилаємо подію клієнтам лише при видаленні
   if (change.operationType === "delete") {
-    io.emit("dbUpdate", change); // Надсилаємо подію клієнтам лише при видаленні
   }
 });
 
@@ -50,6 +50,7 @@ io.on("connection", socket => {
 
         // io.emit("playerJoined", { gameId, player }); // Надсилаємо ВСІМ оновлення (не правильно, якщо є багато ігор)
       }
+
       // Додаткова перевірка, щоб надіслати повідомлення, якщо гравець двічі доєднується до гри (не обов'язково)
       if (game.players.some(p => p.userId === player.userId)) {
         socket.emit("error", { message: "Ви вже приєдналися до гри!" });
@@ -74,6 +75,12 @@ io.on("connection", socket => {
     } catch (err) {
       console.error("Error starting game:", err);
     }
+  });
+
+  socket.on("deleteGame", async gameId => {
+    const deletedGame = await Game.findByIdAndDelete(gameId);
+
+    io.emit("gameDeleted", deletedGame);
   });
 
   socket.on("disconnect", () => {
