@@ -41,17 +41,13 @@ const register = async (req, res) => {
 
   await newUser.save();
 
-  res.status(201).json({
-    email: newUser.email,
-    name: newUser.name,
-    token: newUser.token,
-    userId: newUser._id,
-  });
+  res.status(201).json(newUser);
 };
 
-const login = async (req, res, next) => {
+const login = async (req, res) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email });
+
   if (!user) {
     throw HttpError({
       status: 401,
@@ -71,12 +67,7 @@ const login = async (req, res, next) => {
   const token = jwt.sign({ id: user._id }, SECRET_KEY, { expiresIn: "23h" });
   await User.findByIdAndUpdate(user._id, { token });
 
-  res.json({
-    email: user.email,
-    name: user.name,
-    token,
-    userId: user._id,
-  });
+  res.json({ ...user._doc, userId: user._id, token });
 };
 
 // Check whether token is still valid and send name&email
