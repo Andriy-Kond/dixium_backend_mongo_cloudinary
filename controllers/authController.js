@@ -67,7 +67,7 @@ const login = async (req, res) => {
   const token = jwt.sign({ id: user._id }, SECRET_KEY, { expiresIn: "23h" });
   await User.findByIdAndUpdate(user._id, { token });
 
-  res.json({ ...user._doc, userId: user._id, token });
+  res.json({ ...user._doc, token });
 };
 
 // Check whether token is still valid and send name&email

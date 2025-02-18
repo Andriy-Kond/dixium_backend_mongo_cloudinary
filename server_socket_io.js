@@ -12,8 +12,10 @@ const io = new Server(httpServer, { cors: { origin: "*" } });
 const changeStream = Game.watch();
 changeStream.on("change", change => {
   console.log("Зміни в БД");
-  io.emit("dbUpdate", change); // Надсилаємо подію клієнтам лише при видаленні
+
+  // Надсилаємо подію клієнтам лише при видаленні
   if (change.operationType === "delete") {
+    io.emit("dbUpdateGamesColl", change);
   }
 });
 
@@ -80,7 +82,7 @@ io.on("connection", socket => {
   socket.on("deleteGame", async gameId => {
     const deletedGame = await Game.findByIdAndDelete(gameId);
 
-    io.emit("gameDeleted", deletedGame);
+    io.emit("currentGameWasDeleted", deletedGame);
   });
 
   socket.on("disconnect", () => {

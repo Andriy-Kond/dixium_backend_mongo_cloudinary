@@ -36,7 +36,7 @@ const mongooseUserSchema = new Schema(
       type: String,
       required: [true, "Email is required"],
       // You can use "match" for simple validation:
-      match: [emailRegExp, "Invalid email format"],
+      // match: [emailRegExp, "Invalid email format"],
 
       //* Unique check
       // For unique error must be status 409 and should be other error message
@@ -75,12 +75,14 @@ export const User = model("user", mongooseUserSchema);
 //^ Joi-schemas - validates data coming from the frontend
 const registerUser = Joi.object({
   name: Joi.string().alphanum().min(3).max(30).required(),
-  email: Joi.string().pattern(emailRegExp).required(),
+  // email: Joi.string().pattern(emailRegExp).required(),
+  email: Joi.string().required(),
   password: Joi.string().required(),
 });
 
 const loginUser = Joi.object({
-  email: Joi.string().pattern(emailRegExp).required(),
+  // email: Joi.string().pattern(emailRegExp).required(),
+  email: Joi.string().required(),
   password: Joi.string().required(),
 });
 
