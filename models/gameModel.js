@@ -4,7 +4,7 @@ import { handleMongooseError } from "../utils/handleMongooseError.js";
 const GameSchema = new Schema(
   {
     gameName: String, // Game name
-    players: [{ userId: String, name: String, avatar: String }], // List of players
+    players: [{ name: String, avatar: String }], // List of players
     deck: [
       {
         cardName: String,
@@ -15,7 +15,7 @@ const GameSchema = new Schema(
     ], // Deck of cards
     isGameRun: Boolean, // game started and running (players cannot join)
     isGameStarted: Boolean, // game started but not running (players can join)
-    hostPlayerId: Schema.Types.ObjectId,
+    hostPlayerId: String,
     hostPlayerName: String,
     gameTitle: String,
   },

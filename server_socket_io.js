@@ -22,8 +22,10 @@ changeStream.on("change", change => {
 io.on("connection", socket => {
   console.log(`User connected: ${socket.id}`);
 
+  const emitError = message => socket.emit("error", { message });
+
   // Обробка створення нової гри (Гравець створює гру)
-  socket.on("createGame", async gameData => {
+  const handleCreateGame = async gameData => {
     try {
       const newGame = await createNewGame(gameData);
 
@@ -31,31 +33,39 @@ io.on("connection", socket => {
       io.emit("newGameCreated", newGame); // Надсилаємо ВСІМ (.emit) оновлений список ігор
     } catch (err) {
       console.error("Error creating game:", err);
+      emitError("Server error");
     }
-  });
+  };
 
-  socket.on("startOrJoinToGame", async ({ gameId, player }) => {
+  const handleStartOrJoinToGame = async ({ gameId, player }) => {
     try {
       const game = await Game.findById(gameId);
-      if (!game) {
-        socket.emit("error", { message: "Game not found" });
-        return;
-      }
+      if (!game) return socket.emit("error", { message: "Game not found" });
 
-      const isPlayerExists = game.players.some(p => p._id === player._id);
+      const isPlayerExists = game.players.some(p => {
+        return p._id.toString() === player._id.toString(); // convert object to string and compare
+
+        // p._id.equals(player._id); // compare objects of Schema.Types.ObjectId
+        // p.userId === player._id; // compare strings
+
+        // convert string to object and compare:
+        // import { Schema, model } from "mongoose";
+        // p._id.equals(new mongoose.Types.ObjectId(player._id));
+      });
 
       // if game not started only host can start it
       if (!game.isGameStarted) {
         // check if the player is the host
-        if (game.hostPlayerId !== player._id) {
-          socket.emit("error", { message: "Only host can start the game" });
-          return;
-        }
+        if (game.hostPlayerId !== player._id)
+          return socket.emit("error", {
+            message: "Game still not started. Only host can start the game",
+          });
+
         game.isGameStarted = true;
-      } else if (isPlayerExists) {
-        socket.emit("error", { message: "You already joined this game" });
-        return;
-      }
+      } else if (isPlayerExists)
+        return socket.emit("error", {
+          message: "You already joined to this game",
+        });
 
       game.players.push(player);
       await game.save();
@@ -64,16 +74,24 @@ io.on("connection", socket => {
       io.to(gameId).emit("updateGame", game);
     } catch (err) {
       console.error("Error processing game action:", err);
-      socket.emit("error", { message: "Server error" });
+      emitError("Server error");
     }
-  });
+  };
 
-  socket.on("deleteGame", async gameId => {
-    const deletedGame = await Game.findByIdAndDelete(gameId);
-    console.log("deletedGame:::", deletedGame);
+  const handleDeleteGame = async gameId => {
+    try {
+      const deletedGame = await Game.findByIdAndDelete(gameId);
 
-    io.emit("currentGameWasDeleted", deletedGame);
-  });
+      io.emit("currentGameWasDeleted", deletedGame);
+    } catch (err) {
+      console.error("Error creating game:", err);
+      emitError("Server error");
+    }
+  };
+
+  socket.on("createGame", handleCreateGame);
+  socket.on("startOrJoinToGame", handleStartOrJoinToGame);
+  socket.on("deleteGame", handleDeleteGame);
 
   socket.on("disconnect", () => {
     console.log(`Користувач відключився: ${socket.id}`);

@@ -10,3 +10,16 @@ export const tryCatchDecorator = ctrlFn => {
 
   return coverFn;
 };
+
+export const tryCatchDecoratorForWebsocket = handler => {
+  return async (...args) => {
+    const [socket] = args;
+
+    try {
+      await handler(...args);
+    } catch (error) {
+      console.error("Socket error:", error);
+      socket.emit("error", { message: "Server error" });
+    }
+  };
+};
