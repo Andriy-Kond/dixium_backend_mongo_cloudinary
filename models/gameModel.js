@@ -13,8 +13,8 @@ const GameSchema = new Schema(
         _id: Schema.Types.ObjectId, // Card id from MongoDB (like owner)
       },
     ], // Deck of cards
-    startGame: Boolean, // Triggers when
-    isGameStarted: Boolean,
+    isGameRun: Boolean, // game started and running (players cannot join)
+    isGameStarted: Boolean, // game started but not running (players can join)
     hostPlayerId: Schema.Types.ObjectId,
     hostPlayerName: String,
     gameTitle: String,
