@@ -82,7 +82,7 @@ io.on("connection", socket => {
     try {
       const deletedGame = await Game.findByIdAndDelete(gameId);
 
-      io.emit("currentGameWasDeleted", deletedGame);
+      // io.emit("currentGameWasDeleted", deletedGame);
     } catch (err) {
       console.error("Error creating game:", err);
       emitError("Server error");
