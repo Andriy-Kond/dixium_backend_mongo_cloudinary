@@ -64,6 +64,16 @@ io.on("connection", socket => {
       await game.save();
       socket.join(gameId);
 
+      // checking is sockets in room:
+      // io.in(gameId)
+      //   .fetchSockets()
+      //   .then(sockets => {
+      //     console.log(
+      //       `Sockets in room ${gameId}:`,
+      //       sockets.map(s => s.id),
+      //     );
+      //   });
+
       // Update game for all players:
       io.emit("updateGame", game);
 
@@ -73,13 +83,12 @@ io.on("connection", socket => {
         message: `Player ${player.name.toUpperCase()} joined to this game`,
       });
     } catch (err) {
-      console.error("Error processing game action:", err);
+      console.error("Error start or join to game action:", err);
       emitError("Server error");
     }
   };
 
   const handleDeleteGame = async gameId => {
-    console.log("gameId:::", gameId);
     try {
       const deletedGame = await Game.findByIdAndDelete(gameId);
 
@@ -95,9 +104,30 @@ io.on("connection", socket => {
     }
   };
 
+  const handleNewPlayersOrder = async ({ gameId, players }) => {
+    console.log("handleNewPlayersOrder >> players:::", players);
+    console.log("handleNewPlayersOrder >> gameId:::", gameId);
+    try {
+      const game = await Game.findById(gameId);
+      if (!game)
+        return io.to(gameId).emit("error", {
+          message: "Server error: Game not found",
+        });
+
+      game.players = players;
+      await game.save();
+
+      io.to(gameId).emit("playersOrderUpdated", game);
+      // io.emit("playersOrderUpdated", game);
+    } catch (err) {
+      console.error("Error players order update:", err);
+      emitError("Server error");
+    }
+  };
   socket.on("createGame", handleCreateGame);
   socket.on("startOrJoinToGame", handleStartOrJoinToGame);
   socket.on("deleteGame", handleDeleteGame);
+  socket.on("newPlayersOrder", handleNewPlayersOrder);
 
   socket.on("disconnect", () => {
     console.log(`Користувач відключився: ${socket.id}`);
