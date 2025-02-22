@@ -7,18 +7,6 @@ import { createNewGame } from "./services/gameService.js";
 export const httpServer = createServer(app);
 const io = new Server(httpServer, { cors: { origin: "*" } });
 
-// Use Stream of MongoDB
-// Tracking changes the Game-collection in mongodb
-// const changeStream = Game.watch();
-// changeStream.on("change", change => {
-//   console.log("Зміни в БД");
-
-//   // Надсилаємо подію клієнтам лише при видаленні
-//   if (change.operationType === "delete") {
-//     io.emit("dbUpdateGamesColl", change);
-//   }
-// });
-
 io.on("connection", socket => {
   console.log(`User connected: ${socket.id}`);
 
@@ -55,24 +43,16 @@ io.on("connection", socket => {
           });
 
         game.isGameStarted = true;
-      } else if (isPlayerExists)
-        return socket.emit("error", {
-          message: "You already joined to this game",
-        });
+      } else if (isPlayerExists) {
+        return socket.emit("playerJoined", { game });
+        // return socket.emit("error", {
+        //   message: "You already joined to this game",
+        // });
+      }
 
       game.players.push(player);
       await game.save();
       socket.join(gameId);
-
-      // checking is sockets in room:
-      // io.in(gameId)
-      //   .fetchSockets()
-      //   .then(sockets => {
-      //     console.log(
-      //       `Sockets in room ${gameId}:`,
-      //       sockets.map(s => s.id),
-      //     );
-      //   });
 
       // Update game for all players:
       io.emit("updateGame", game);
@@ -105,8 +85,6 @@ io.on("connection", socket => {
   };
 
   const handleNewPlayersOrder = async ({ gameId, players }) => {
-    console.log("handleNewPlayersOrder >> players:::", players);
-    console.log("handleNewPlayersOrder >> gameId:::", gameId);
     try {
       const game = await Game.findById(gameId);
       if (!game)
@@ -118,12 +96,12 @@ io.on("connection", socket => {
       await game.save();
 
       io.to(gameId).emit("playersOrderUpdated", game);
-      // io.emit("playersOrderUpdated", game);
     } catch (err) {
       console.error("Error players order update:", err);
       emitError("Server error");
     }
   };
+
   socket.on("createGame", handleCreateGame);
   socket.on("startOrJoinToGame", handleStartOrJoinToGame);
   socket.on("deleteGame", handleDeleteGame);
