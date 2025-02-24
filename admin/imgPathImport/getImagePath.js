@@ -11,5 +11,6 @@ export async function getImagePath(folderName) {
     cardName: file.public_id.split("/").pop(),
     public_id: file.public_id,
     url: file.secure_url,
+    isCardPlayed: false,
   }));
 }

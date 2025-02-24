@@ -4,7 +4,13 @@ import { handleMongooseError } from "../utils/handleMongooseError.js";
 const DeckSchema = new Schema(
   {
     name: String,
-    cards: [{ cardName: String, public_id: String, url: String }],
+    cards: [
+      {
+        cardName: String,
+        public_id: String,
+        url: String,
+      },
+    ],
   },
 
   { versionKey: false, timestamps: true },

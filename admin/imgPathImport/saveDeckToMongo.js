@@ -1,8 +1,6 @@
 import { Deck } from "../../models/deckModel.js";
 
 export async function saveDeckToMongo(deckName, images) {
-  console.log("saveDeckToMongo >> images:::", images);
-
   const isExistDeck = await Deck.findOne({ name: deckName });
 
   if (isExistDeck)

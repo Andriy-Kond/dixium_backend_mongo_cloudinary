@@ -28,11 +28,14 @@ io.on("connection", socket => {
   const handleStartOrJoinToGame = async ({ gameId, player }) => {
     try {
       const game = await Game.findById(gameId);
-      if (!game) return socket.emit("error", { message: "Game not found" });
+      if (!game)
+        return socket.emit("error", {
+          message: "Server error: Game not found",
+        });
 
-      const isPlayerExists = game.players.some(p => {
-        return p._id.toString() === player._id.toString();
-      });
+      const isPlayerExists = game.players.some(
+        p => p._id.toString() === player._id.toString(),
+      );
 
       // if game not started only host can start it
       if (!game.isGameStarted) {
@@ -44,14 +47,15 @@ io.on("connection", socket => {
 
         game.isGameStarted = true;
       } else if (isPlayerExists) {
-        return socket.emit("playerJoined", { game });
+        return socket.emit("playerJoined", { game }); // On client side redirect to started game page
         // return socket.emit("error", {
         //   message: "You already joined to this game",
         // });
       }
-
+      player.hand = [];
       game.players.push(player);
       await game.save();
+      console.log("handleStartOrJoinToGame >> game:::", game);
       socket.join(gameId);
 
       // Update game for all players:
@@ -87,10 +91,13 @@ io.on("connection", socket => {
   const handleNewPlayersOrder = async ({ gameId, players }) => {
     try {
       const game = await Game.findById(gameId);
-      if (!game)
-        return io.to(gameId).emit("error", {
+      if (!game) {
+        const error = {
           message: "Server error: Game not found",
-        });
+        };
+
+        return io.to(gameId).emit("playersOrderUpdated", error);
+      }
 
       game.players = players;
       await game.save();
@@ -102,10 +109,26 @@ io.on("connection", socket => {
     }
   };
 
+  const handleCurrentGameRun = async currentGame => {
+    const updatedGame = await Game.findByIdAndUpdate(
+      currentGame._id,
+      currentGame,
+      { new: true },
+    );
+
+    if (!updatedGame)
+      return socket.emit("currentGame:running", {
+        message: "Server error: Game not found",
+      });
+
+    io.to(currentGame._id).emit("currentGame:running", updatedGame);
+  };
+
   socket.on("createGame", handleCreateGame);
   socket.on("startOrJoinToGame", handleStartOrJoinToGame);
   socket.on("deleteGame", handleDeleteGame);
   socket.on("newPlayersOrder", handleNewPlayersOrder);
+  socket.on("currentGame:run", handleCurrentGameRun);
 
   socket.on("disconnect", () => {
     console.log(`Користувач відключився: ${socket.id}`);
