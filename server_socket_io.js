@@ -120,7 +120,7 @@ io.on("connection", socket => {
           message: "Server error: Game not found",
         });
 
-      io.to(updatedGame._id).emit("", game);
+      io.to(updatedGame._id).emit("currentGame:running", game);
     } catch (err) {
       console.error("Error in handling current game run:", err);
       socketEmitError({
