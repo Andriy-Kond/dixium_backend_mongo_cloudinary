@@ -7,8 +7,17 @@ import { createNewGame } from "./services/gameService.js";
 export const httpServer = createServer(app);
 const io = new Server(httpServer, { cors: { origin: "*" } });
 
+// Middleware для доступу до io в контролерах
+app.use((req, res, next) => {
+  req.io = io;
+  next();
+});
+
 io.on("connection", socket => {
   console.log(`User connected: ${socket.id}`);
+
+  const handleCurrentGameUpdate = () => {};
+  io.emit("currentGame:update", handleCurrentGameUpdate);
 
   // send to current user:
   const socketEmitError = ({ message, event = "error" }) =>

@@ -28,11 +28,12 @@ const GameSchema = new Schema(
         _id: Schema.Types.ObjectId, // Card id from MongoDB (like owner)
       },
     ],
-    isGameRun: Boolean, // game started and running (players cannot join)
+    isGameRunning: Boolean, // game started and running (players can't join anymore)
     isGameStarted: Boolean, // game started but not running (players can join)
     hostPlayerId: String,
     hostPlayerName: String,
     gameTitle: String,
+    currentStorytellerId: String,
   },
 
   { versionKey: false, timestamps: true },

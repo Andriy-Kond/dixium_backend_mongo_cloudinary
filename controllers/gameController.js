@@ -31,6 +31,16 @@ const createGame = async (req, res) => {
   res.status(200).json(newGame);
 };
 
+const updateGame = async (req, res) => {
+  const game = await Game.findByIdAndUpdate(req.params.gameId, req.body, {
+    new: true,
+  });
+  // Відправляємо оновлення через сокети всім гравцям
+  req.io.emit("currentGame:update", game);
+
+  res.status(201).json(game); // send http response to current sender (needs for debugging)
+};
+
 const removeGame = async (req, res) => {
   const deletedGame = await Game.findByIdAndDelete(req.params.id);
   res.status(201).json(deletedGame);
@@ -40,4 +50,5 @@ export const gameController = {
   getAllGames: tryCatchDecorator(getAllGames),
   createGame: tryCatchDecorator(createGame),
   removeGame: tryCatchDecorator(removeGame),
+  updateGame: tryCatchDecorator(updateGame),
 };

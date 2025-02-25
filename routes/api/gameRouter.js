@@ -6,3 +6,4 @@ export const gameRouter = express.Router();
 gameRouter.get("/", gameController.getAllGames);
 // gameRouter.post("/", gameController.createGame);
 gameRouter.delete("/:id", gameController.removeGame);
+gameRouter.patch("/:id", gameController.updateGame);
