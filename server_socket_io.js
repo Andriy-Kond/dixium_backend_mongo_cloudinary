@@ -13,6 +13,38 @@ app.use((req, res, next) => {
   next();
 });
 
+const changeStream = Game.watch();
+changeStream.on("change", change => {
+  console.log("Зміни в БД");
+  // change.operationType:
+  // delete - Occurs when a document is removed from the collection
+  // insert - Occurs when an operation adds documents to a collection
+  // update - Occurs when an operation updates a document in a collection
+
+  // Надсилаємо подію клієнтам лише при видаленні
+  // if (change.operationType === "delete") {
+  //   io.emit("dbUpdateGamesColl", change);
+  // }
+
+  // if (change.operationType === "update") {
+  //   const updatedFields = Object.keys(change.updateDescription.updatedFields);
+
+  //   if (updatedFields.includes("players")) {
+  //     io.emit("updateGame", {
+  //       gameId: change.documentKey._id,
+  //       eventType: "PLAYER_JOINED",
+  //     });
+  //   }
+
+  //   if (updatedFields.includes("isGameStarted")) {
+  //     io.emit("updateGame", {
+  //       gameId: change.documentKey._id,
+  //       eventType: "GAME_STARTED",
+  //     });
+  //   }
+  // }
+});
+
 io.on("connection", socket => {
   console.log(`User connected: ${socket.id}`);
 
