@@ -10,6 +10,16 @@ const getAllGames = async (req, res) => {
   res.json(games);
 };
 
+const getCurrentGame = async (req, res) => {
+  console.log("get current game");
+  console.log("getCurrentGame >> req.params.id:::", req.params.id);
+  const game = await Game.findById(req.params.id);
+  console.log("getCurrentGame >> game:::", game);
+
+  res.json(game);
+  // req.io.emit("getCurrentGame", game);
+};
+
 const createGame = async (req, res) => {
   console.log("creating new game");
 
@@ -48,6 +58,7 @@ const removeGame = async (req, res) => {
 
 export const gameController = {
   getAllGames: tryCatchDecorator(getAllGames),
+  getCurrentGame: tryCatchDecorator(getCurrentGame),
   createGame: tryCatchDecorator(createGame),
   removeGame: tryCatchDecorator(removeGame),
   updateGame: tryCatchDecorator(updateGame),

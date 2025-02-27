@@ -1,11 +1,11 @@
 import { createServer } from "http";
 import { Server } from "socket.io";
-import { app } from "./app.js";
-import { Game } from "./models/gameModel.js";
-import { createNewGame } from "./services/gameService.js";
+import { app } from "../app.js";
+import { Game } from "../models/gameModel.js";
+import { createNewGame } from "../services/gameService.js";
 
 export const httpServer = createServer(app);
-const io = new Server(httpServer, { cors: { origin: "*" } });
+export const io = new Server(httpServer, { cors: { origin: "*" } });
 
 // Middleware для доступу до io в контролерах
 app.use((req, res, next) => {
@@ -14,46 +14,93 @@ app.use((req, res, next) => {
 });
 
 const changeStream = Game.watch();
-changeStream.on("change", change => {
-  console.log("Зміни в БД");
-  // change.operationType:
-  // delete - Occurs when a document is removed from the collection
-  // insert - Occurs when an operation adds documents to a collection
-  // update - Occurs when an operation updates a document in a collection
+// changeStream.on("change", change => {
+//   // console.log("change:::", change);
+//   console.log(
+//     "change.updateDescription.updatedFields :>> ",
+//     change?.updateDescription?.updatedFields,
+//   );
+//   console.log("Зміни в БД");
 
-  // Надсилаємо подію клієнтам лише при видаленні
-  // if (change.operationType === "delete") {
-  //   io.emit("dbUpdateGamesColl", change);
-  // }
+//   switch (change.operationType) {
+//     case "delete":
+//       console.log("delete :>> ");
+//       // io.emit("delete", change);
+//       break;
+//     case "insert":
+//       console.log("insert :>> ");
+//       // io.emit("insert", change);
+//       handleCreateGame(gameData);
+//       break;
+//     case "update":
+//       const updatedFields = Object.keys(change.updateDescription.updatedFields);
 
-  // if (change.operationType === "update") {
-  //   const updatedFields = Object.keys(change.updateDescription.updatedFields);
+//       if (updatedFields.includes("isGameRunning")) {
+//         console.log(" updatedFields :>>isGameRunning ");
+//         handleNewPlayersOrder();
+//       }
 
-  //   if (updatedFields.includes("players")) {
-  //     io.emit("updateGame", {
-  //       gameId: change.documentKey._id,
-  //       eventType: "PLAYER_JOINED",
-  //     });
-  //   }
+//       if (updatedFields.includes("players")) {
+//         // Перший гравець передається як об'єкт у масиві players:
+//         if (Array.isArray(updatedFields.players)) {
+//           newPlayer = updatedFields.players.at(-1); // Останній гравець у масиві
+//         } else {
+//           // Наступні гравці передаються як окремі об'єкти - частинки масиву players, але після ключу "players.1:{}" для другого гравця, "players.2:{} для третього гравця тощо"
+//           // Шукаємо поле 'players.X'
+//           const playerKey = Object.keys(updatedFields).find(key =>
+//             key.startsWith("players."),
+//           );
+//           if (playerKey) {
+//             newPlayer = updatedFields[playerKey];
+//           }
+//         }
 
-  //   if (updatedFields.includes("isGameStarted")) {
-  //     io.emit("updateGame", {
-  //       gameId: change.documentKey._id,
-  //       eventType: "GAME_STARTED",
-  //     });
-  //   }
-  // }
-});
+//         if (newPlayer) {
+//           console.log(`Новий гравець: ${newPlayer.name}`);
+//           // Передати `newPlayer` всім клієнтам
+//           handleStartOrJoinToGame({
+//             gameId: change.documentKey,
+//             player: newPlayer,
+//           });
+//           // io.emit("updateGame", {
+//           //   gameId: change.documentKey._id,
+//           //   eventType: "PLAYER_JOINED",
+//           // });
+//         }
+//       }
+
+//       if (updatedFields.includes("isGameStarted")) {
+//         io.emit("updateGame", {
+//           gameId: change.documentKey._id,
+//           eventType: "GAME_STARTED",
+//         });
+//       }
+//       // io.emit("update", change);
+//       break;
+//     default:
+//       io.emit("unknown", { message: "Unknown DB event" });
+//   }
+// });
 
 io.on("connection", socket => {
   console.log(`User connected: ${socket.id}`);
 
+  // socket.on("checkConnection", () => {
+  //   console.log(`Connection check from: ${socket.id}`);
+  //   socket.emit("connectionConfirmed"); // Відправляємо підтвердження клієнту
+  // });
+
+  // socket.on("joinGame", gameId => {
+  //   socket.join(gameId);
+  //   console.log(`Socket ${socket.id} joined to room ${gameId}`);
+  // });
+
   const handleCurrentGameUpdate = () => {};
   io.emit("currentGame:update", handleCurrentGameUpdate);
 
-  // send to current user:
-  const socketEmitError = ({ message, event = "error" }) =>
-    socket.emit(event, { message });
+  // // send to current user:
+  // const socketEmitError = ({ message, event = "error" }) =>
+  //   socket.emit(event, { message });
 
   // Обробка створення нової гри (Гравець створює гру)
   const handleCreateGame = async gameData => {
@@ -97,6 +144,7 @@ io.on("connection", socket => {
       game.players.push(player);
       await game.save();
       socket.join(gameId);
+      console.log(`Socket ${socket.id} joined to room ${gameId}`);
 
       // Update game for all players:
       io.emit("updateGame", game);
@@ -116,14 +164,14 @@ io.on("connection", socket => {
 
   const handleDeleteGame = async gameId => {
     try {
-      const deletedGame = await Game.findByIdAndDelete(gameId);
+      const game = await Game.findByIdAndDelete(gameId);
 
-      if (!deletedGame)
+      if (!game)
         return io.to(gameId).emit("currentGameWasDeleted", {
           message: "Server error: cannot to delete game",
         });
 
-      io.emit("currentGameWasDeleted", deletedGame);
+      io.emit("currentGameWasDeleted", { game });
     } catch (err) {
       console.log("Server error: Cannot delete game", err);
       socketEmitError({ message: "Server error: Cannot delete game" });
@@ -131,6 +179,8 @@ io.on("connection", socket => {
   };
 
   const handleNewPlayersOrder = async updatedGame => {
+    console.log("updatedGame._id:::", updatedGame._id);
+
     try {
       const game = await Game.findByIdAndUpdate(updatedGame._id, updatedGame, {
         new: true,
@@ -141,7 +191,9 @@ io.on("connection", socket => {
           message: "Server error: Game not found",
         });
 
-      io.to(updatedGame._id).emit("playersOrderUpdated", game);
+      console.log("game._id:::", game._id);
+      console.log("Emitted playersOrderUpdated to room:", updatedGame._id);
+      io.to(updatedGame._id).emit("playersOrderUpdated", { game });
     } catch (err) {
       console.log("Error players order update:", err);
       socketEmitError({
