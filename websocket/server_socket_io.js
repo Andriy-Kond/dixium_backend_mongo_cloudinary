@@ -223,6 +223,38 @@ io.on("connection", socket => {
     }
   };
 
+  const handleJoinGameRoom = async ({ gameId, userId }) => {
+    try {
+      // Перевіряємо, чи існує гра і чи користувач є її учасником
+      const game = await Game.findById(gameId);
+      if (!game) {
+        socket.emit("error", {
+          message: "handleJoinGameRoom >> Game not found",
+        });
+        return;
+      }
+
+      const isPlayerInGame = game.players.some(
+        player => player._id.toString() === userId,
+      );
+      if (!isPlayerInGame) {
+        socket.emit("error", { message: "You are not a player in this game" });
+        return;
+      }
+
+      // Додаємо користувача до кімнати
+      socket.join(gameId);
+      console.log(`User ${userId} (socket ${socket.id}) joined room ${gameId}`);
+
+      // Опціонально: повідомляємо клієнту, що він успішно приєднався
+      socket.emit("joinedGameRoom", { gameId, game });
+    } catch (err) {
+      console.error("Error joining game room:", err);
+      socket.emit("error", { message: "Server error while joining room" });
+    }
+  };
+
+  socket.on("joinGameRoom", handleJoinGameRoom);
   socket.on("createGame", handleCreateGame);
   socket.on("startOrJoinToGame", handleStartOrJoinToGame);
   socket.on("deleteGame", handleDeleteGame);
