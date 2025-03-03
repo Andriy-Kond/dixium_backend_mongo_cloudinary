@@ -125,14 +125,9 @@ io.on("connection", socket => {
   };
 
   const handleGameEntry = async ({ gameId, player }) => {
-    console.log("gameId :>> ", gameId);
     try {
       const game = await findGameOrFail(gameId, socket);
       if (!game) return;
-
-      const isPlayerInGame = game.players.some(
-        p => p._id.toString() === player._id.toString(),
-      );
 
       // If game not started only host can start it
       if (!game.isGameStarted) {
@@ -146,6 +141,10 @@ io.on("connection", socket => {
         game.isGameStarted = true;
       }
 
+      const isPlayerInGame = game.players.some(
+        p => p._id.toString() === player._id.toString(),
+      );
+
       // Add player if he still not in game
       await addPlayerToGame(game, player, isPlayerInGame);
 
@@ -155,11 +154,11 @@ io.on("connection", socket => {
       // Оновлюємо гру для всіх і сповіщаємо кімнату
       io.emit("updateGame", game);
 
-      console.log("handleGameEntry >> isPlayerInGame:::", isPlayerInGame);
       notifyRoom({
         io,
         game,
         gameId,
+        player,
         isPlayerInGame,
         message: `Player ${player.name.toUpperCase()} joined to game`,
       });
@@ -191,7 +190,7 @@ io.on("connection", socket => {
 
       if (!game)
         return io.to(gameId).emit("currentGameWasDeleted", {
-          message: "Server error: cannot to delete game",
+          message: "Server error: game not found",
         });
 
       io.emit("currentGameWasDeleted", { game });

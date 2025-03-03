@@ -25,7 +25,7 @@ async function addPlayerToGame(game, player, isPlayerInGame) {
     game.players.push(player);
     await game.save();
   }
-  return game;
+  return game; // нащо?
 }
 
 // Приєднання сокета до кімнати
@@ -37,9 +37,10 @@ function joinSocketToRoom(socket, gameId, player) {
 }
 
 // Сповіщення всіх у кімнаті
-function notifyRoom({ io, gameId, game, isPlayerInGame, message }) {
+function notifyRoom({ io, gameId, game, player, isPlayerInGame, message }) {
   io.to(gameId).emit("playerJoined", {
     game,
+    player,
     ...(!isPlayerInGame && { message }), // send message only if it first join player to game
   });
 }
