@@ -6,6 +6,8 @@ import { createNewGame } from "../services/gameService.js";
 import { socketEmitError } from "./socketEmitError.js";
 import {
   addPlayerToGame,
+  findGameAndDeleteOrFail,
+  findGameAndUpdateOrFail,
   findGameOrFail,
   joinSocketToRoom,
   notifyRoom,
@@ -93,7 +95,6 @@ io.on("connection", socket => {
   console.log(`User connected: ${socket.id}`);
 
   const handleRejoinToGame = async ({ gameId, player }) => {
-    console.log("player._id :>> ", player._id);
     try {
       const game = await findGameOrFail(gameId, socket);
       if (!game) return;
@@ -105,7 +106,7 @@ io.on("connection", socket => {
 
       if (!isPlayerInGame) {
         return socketEmitError({
-          message: "You are not a player in this game",
+          errorMessage: "You are not a player in this game",
           socket,
         });
       }
@@ -113,16 +114,20 @@ io.on("connection", socket => {
       // Приєднуємо до кімнати
       joinSocketToRoom(socket, gameId, player);
 
-      // Повідомляємо клієнту
-      // socket.emit("playerJoinedToRoom", {
+      // Повідомляємо клієнту, що він перепідключений
+      // socket.emit("playerReJoined", {
       //   game,
-      //   message: `Player ${player.name.toUpperCase()} joined to room`,
+      //   player,
+      //   message: `You are rejoined to game room`,
       // });
     } catch (err) {
       console.error("Error joining game room:", err);
-      socketEmitError({ message: "Server error while joining room", socket });
+      socketEmitError({
+        errorMessage: "Error joining game room",
+        socket,
+      });
     }
-  };
+  }; //* OK
 
   const handleGameEntry = async ({ gameId, player }) => {
     try {
@@ -134,7 +139,8 @@ io.on("connection", socket => {
         // check if the player is the host
         if (game.hostPlayerId !== player._id) {
           return socketEmitError({
-            message: "Game still not started. Only host can start the game",
+            errorMessage:
+              "Game still not started. Only host can start the game",
             socket,
           });
         }
@@ -165,106 +171,92 @@ io.on("connection", socket => {
     } catch (err) {
       console.log("Error start or join to game action:", err);
       socketEmitError({
-        message: "Server error: Error start or join to game action",
+        errorMessage: "Server error: Error start or join to game action",
         socket,
       });
     }
-  };
+  }; //* OK
 
   // Обробка створення нової гри (Гравець створює гру)
   const handleCreateGame = async gameData => {
     try {
-      const newGame = await createNewGame(gameData);
+      const game = await createNewGame(gameData);
+      if (!game) return;
 
       // Оповіщення всіх під'єднаних клієнтів про створену гру
-      io.emit("newGameCreated", newGame); // Надсилаємо ВСІМ (.emit) оновлений список ігор
+      io.emit("newGameCreated", game); // Надсилаємо ВСІМ (.emit) оновлений список ігор
     } catch (err) {
       console.error("Error creating game:", err);
-      socketEmitError({ message: "Server error: creating game error", socket });
+      socketEmitError({
+        errorMessage: "Server error: creating game error",
+        socket,
+      });
     }
-  };
+  }; //* OK
 
   const handleDeleteGame = async gameId => {
+    const event = "currentGameWasDeleted";
     try {
-      const game = await Game.findByIdAndDelete(gameId);
+      const game = await findGameAndDeleteOrFail(gameId, socket, event);
+      if (!game) return;
 
-      if (!game)
-        return io.to(gameId).emit("currentGameWasDeleted", {
-          message: "Server error: game not found",
-        });
-
-      io.emit("currentGameWasDeleted", { game });
+      io.emit(event, { game });
     } catch (err) {
       console.log("Server error: Cannot delete game", err);
-      socketEmitError({ message: "Server error: Cannot delete game", socket });
-    }
-  };
-
-  const handleNewPlayersOrder = async updatedGame => {
-    console.log("updatedGame._id:::", updatedGame._id);
-
-    try {
-      const game = await Game.findByIdAndUpdate(updatedGame._id, updatedGame, {
-        new: true,
+      socketEmitError({
+        errorMessage: "Server error: Cannot delete game",
+        socket,
       });
+    }
+  }; //* OK
 
-      if (!game)
-        return io.to(updatedGame._id).emit("playersOrderUpdated", {
-          message: "Server error: Game not found",
-        });
+  const handleNewPlayersOrder = async currentGame => {
+    const event = "playersOrderUpdated";
+    try {
+      const game = await findGameAndUpdateOrFail(currentGame, socket, event);
+      if (!game) return;
 
-      io.to(updatedGame._id).emit("playersOrderUpdated", { game });
+      io.to(currentGame._id).emit(event, { game });
     } catch (err) {
       console.log("Error players order update:", err);
       socketEmitError({
-        message: "Server error: players order not changed",
+        errorMessage: "Error players order update",
         socket,
       });
     }
-  };
+  }; //* OK
 
-  const handleCurrentGameRun = async updatedGame => {
+  const handleCurrentGameRun = async currentGame => {
+    const event = "currentGame:running";
     try {
-      const game = await Game.findByIdAndUpdate(updatedGame._id, updatedGame, {
-        new: true,
-      });
+      const game = await findGameAndUpdateOrFail(currentGame, socket, event);
+      if (!game) return;
 
-      if (!game)
-        return io.to(updatedGame._id).emit("currentGame:running", {
-          message: "Server error: Game not found",
-        });
-
-      io.to(updatedGame._id).emit("currentGame:running", { game });
+      io.to(currentGame._id).emit(event, { game });
     } catch (err) {
       console.error("Error in handling current game run:", err);
       socketEmitError({
-        message: "Server error occurred. Please try again later.",
-        event: "currentGame:running",
+        errorMessage: "Error in handling current game run.",
         socket,
       });
     }
-  };
+  }; //* OK
 
   const handleSetFirstStoryteller = async ({ currentGame, player }) => {
+    const event = "firstStoryteller:updated";
     try {
-      const game = await Game.findByIdAndUpdate(currentGame._id, currentGame, {
-        new: true,
-      });
+      const game = await findGameAndUpdateOrFail(currentGame, socket, event);
+      if (!game) return;
 
-      if (!game)
-        return io.to(currentGame._id).emit("error", {
-          message: "Server error: Game not found",
-        });
-
-      io.to(currentGame._id).emit("firstStoryteller:updated", game);
+      io.to(currentGame._id).emit(event, { game });
     } catch (err) {
       console.error("Error in handling set first storyteller:", err);
       socketEmitError({
-        message: "Server error occurred. Please try again later.",
+        errorMessage: "Error in handling set first storyteller.",
         socket,
       });
     }
-  };
+  }; //* OK but not finish
 
   socket.on("setFirstStoryteller", handleSetFirstStoryteller);
   socket.on("joinGameRoom", handleRejoinToGame);
