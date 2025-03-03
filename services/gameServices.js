@@ -1,5 +1,17 @@
 import { Game } from "../models/gameModel.js";
-import { socketEmitError } from "./socketEmitError.js";
+import { socketEmitError } from "../websocket/socketEmitError.js";
+import { generateGameName } from "../utils/generateGameName.js";
+import { getRandomItem } from "../utils/getRandomItem.js";
+
+// Створення нової гри
+async function createNewGame(gameData) {
+  const newGame = new Game(gameData);
+  newGame.gameName = generateGameName();
+  newGame.gameTitle = getRandomItem(newGame.deck).url;
+  await newGame.save();
+
+  return newGame;
+}
 
 // Перевірка, чи гра існує
 async function findGameOrFail(gameId, socket) {
@@ -82,6 +94,7 @@ async function findGameAndDeleteOrFail(gameId, socket, event) {
 }
 
 export {
+  createNewGame,
   findGameOrFail,
   findGameAndUpdateOrFail,
   addPlayerToGame,

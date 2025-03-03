@@ -2,16 +2,17 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 import { app } from "../app.js";
 import { Game } from "../models/gameModel.js";
-import { createNewGame } from "../services/gameService.js";
+
 import { socketEmitError } from "./socketEmitError.js";
 import {
+  createNewGame,
   addPlayerToGame,
   findGameAndDeleteOrFail,
   findGameAndUpdateOrFail,
   findGameOrFail,
   joinSocketToRoom,
   notifyRoom,
-} from "./utils.js";
+} from "../services/gameServices.js";
 
 export const httpServer = createServer(app);
 export const io = new Server(httpServer, { cors: { origin: "*" } });
@@ -158,7 +159,7 @@ io.on("connection", socket => {
       joinSocketToRoom(socket, gameId, player);
 
       // Оновлюємо гру для всіх і сповіщаємо кімнату
-      io.emit("updateGame", game);
+      io.emit("gameChange", { game });
 
       notifyRoom({
         io,
@@ -184,7 +185,7 @@ io.on("connection", socket => {
       if (!game) return;
 
       // Оповіщення всіх під'єднаних клієнтів про створену гру
-      io.emit("newGameCreated", game); // Надсилаємо ВСІМ (.emit) оновлений список ігор
+      io.emit("gameChange", { game, isNew: true }); // Надсилаємо ВСІМ (.emit) нову гру
     } catch (err) {
       console.error("Error creating game:", err);
       socketEmitError({
@@ -195,7 +196,7 @@ io.on("connection", socket => {
   }; //* OK
 
   const handleDeleteGame = async gameId => {
-    const event = "currentGameWasDeleted";
+    const event = "gameWasDeleted";
     try {
       const game = await findGameAndDeleteOrFail(gameId, socket, event);
       if (!game) return;
@@ -256,7 +257,7 @@ io.on("connection", socket => {
         socket,
       });
     }
-  }; //* OK but not finish
+  }; //* OK but not finished
 
   socket.on("setFirstStoryteller", handleSetFirstStoryteller);
   socket.on("joinGameRoom", handleRejoinToGame);

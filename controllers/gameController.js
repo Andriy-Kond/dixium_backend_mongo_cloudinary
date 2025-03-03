@@ -1,7 +1,7 @@
 import { Game } from "../models/gameModel.js";
 import { tryCatchDecorator } from "../utils/tryCatchDecorator.js";
 
-import { createNewGame } from "../services/gameService.js";
+import { createNewGame } from "../services/gameServices.js";
 
 const getAllGames = async (req, res) => {
   console.log("get all games");
@@ -11,13 +11,9 @@ const getAllGames = async (req, res) => {
 };
 
 const getCurrentGame = async (req, res) => {
-  console.log("get current game");
-  console.log("getCurrentGame >> req.params.id:::", req.params.id);
   const game = await Game.findById(req.params.id);
-  console.log("getCurrentGame >> game:::", game);
 
   res.json(game);
-  // req.io.emit("getCurrentGame", game);
 };
 
 const createGame = async (req, res) => {
