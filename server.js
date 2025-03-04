@@ -1,6 +1,7 @@
 import "dotenv/config";
 import mongoose from "mongoose";
 import { httpServer } from "./websocket/server_socket_io.js";
+import { importAllDecks } from "./admin/imgPathImport/imgPathImport.js";
 
 // import { imgPathImport } from "./admin/imgPathImport/imgPathImport.js";
 
@@ -10,14 +11,12 @@ mongoose
   .connect(DB_HOST)
   .then(() => {
     console.log("MongoDB connected");
+    //! Admin Decks Import desks:
+    // importAllDecks();
   })
   .catch(err => {
     console.log(err.message);
     process.exit(1);
   });
-
-//! Admin Decks Imports
-// const deckName = "deck_02";
-// imgPathImport(deckName);
 
 httpServer.listen(port, () => console.log(`Server running on port ${port}`));

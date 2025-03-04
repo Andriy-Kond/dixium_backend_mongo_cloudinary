@@ -1,16 +1,11 @@
 import { Schema, model } from "mongoose";
 import { handleMongooseError } from "../utils/handleMongooseError.js";
+import { CardSchema } from "./cardSchema.js";
 
 const DeckSchema = new Schema(
   {
     name: String,
-    cards: [
-      {
-        cardName: String,
-        public_id: String,
-        url: String,
-      },
-    ],
+    cards: [CardSchema],
   },
 
   { versionKey: false, timestamps: true },

@@ -22,13 +22,13 @@ const createGame = async (req, res) => {
   // opt.1
   // const newGame = await Game.create(req.body); // First db query
   // newGame.gameName = generateGameName();
-  // newGame.gameTitle = getRandomItem(newGame.deck).url;
+  // newGame.gamePoster = getRandomItem(newGame.deck).url;
   // await newGame.save(); // Second db query
 
   // opt.2
   // const newGame = new Game(req.body);
   // newGame.gameName = generateGameName();
-  // newGame.gameTitle = getRandomItem(newGame.deck).url;
+  // newGame.gamePoster = getRandomItem(newGame.deck).url;
   // await newGame.save(); // One single db query
 
   // opt.2.1

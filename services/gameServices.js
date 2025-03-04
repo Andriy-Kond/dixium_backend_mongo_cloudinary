@@ -7,7 +7,7 @@ import { getRandomItem } from "../utils/getRandomItem.js";
 async function createNewGame(gameData) {
   const newGame = new Game(gameData);
   newGame.gameName = generateGameName();
-  newGame.gameTitle = getRandomItem(newGame.deck).url;
+  newGame.gamePoster = getRandomItem(newGame.deck).url;
   await newGame.save();
 
   return newGame;
