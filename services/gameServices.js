@@ -6,6 +6,7 @@ import { getRandomItem } from "../utils/getRandomItem.js";
 // Створення нової гри
 async function createNewGame(gameData) {
   const newGame = new Game(gameData);
+
   newGame.gameName = generateGameName();
   newGame.gamePoster = getRandomItem(newGame.deck).url;
   await newGame.save();
@@ -32,6 +33,8 @@ async function findGameOrFail(gameId, socket) {
 
 // Перевірка, чи гра існує і її оновлення
 async function findGameAndUpdateOrFail(currentGame, socket, event) {
+  console.log("findGameAndUpdateOrFail");
+
   const game = await Game.findByIdAndUpdate(currentGame._id, currentGame, {
     new: true,
   });
