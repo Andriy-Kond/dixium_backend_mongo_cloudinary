@@ -9,7 +9,7 @@ export const setFirstStoryteller = async ({
 }) => {
   console.log("setFirstStoryteller");
 
-  const event = "firstStoryteller:updated";
+  const event = "firstStorytellerUpdated";
   try {
     const game = await findGameAndUpdateOrFail(currentGame, socket, event);
     if (!game) throw new Error(`Game error: the game is ${game}`);
@@ -22,4 +22,4 @@ export const setFirstStoryteller = async ({
       socket,
     });
   }
-}; //* OK but not finished
+};

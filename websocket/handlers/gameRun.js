@@ -4,7 +4,7 @@ import { socketEmitError } from "../socketEmitError.js";
 export const gameRun = async ({ updatedGame, socket, io }) => {
   console.log("handleGameRun");
 
-  const event = "currentGame:running";
+  const event = "gameRunning";
   try {
     const game = await findGameAndUpdateOrFail(updatedGame, socket, event);
     if (!game) throw new Error(`The game is ${game}`);

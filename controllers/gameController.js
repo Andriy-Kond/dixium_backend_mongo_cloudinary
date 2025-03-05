@@ -42,7 +42,7 @@ const updateGame = async (req, res) => {
     new: true,
   });
   // Відправляємо оновлення через сокети всім гравцям
-  req.io.emit("currentGame:update", game);
+  req.io.emit("currentGame:update", game); // ??
 
   res.status(201).json(game); // send http response to current sender (needs for debugging)
 };

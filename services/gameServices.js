@@ -64,7 +64,7 @@ async function addPlayerToGame(game, player, isPlayerInGame) {
     game.players.push(player);
     await game.save();
   }
-  return game; // нащо?
+  // return game; // нащо?
 }
 
 // Приєднання сокета до кімнати

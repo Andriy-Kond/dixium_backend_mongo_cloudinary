@@ -35,7 +35,7 @@ export const gameEntry = async ({ gameId, player, socket, io }) => {
     joinSocketToRoom(socket, gameId, player);
 
     // Оновлюємо гру для всіх і сповіщаємо кімнату
-    io.emit("gameChange", { game });
+    io.emit("gameCreatedOrUpdated", { game });
 
     notifyRoom({
       io,

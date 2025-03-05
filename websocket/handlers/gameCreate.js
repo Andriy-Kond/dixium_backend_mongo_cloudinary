@@ -8,7 +8,7 @@ export const gameCreate = async ({ gameData, socket, io }) => {
     if (!game) throw new Error(`The game is ${game}`);
 
     // Оповіщення всіх під'єднаних клієнтів про створену гру
-    io.emit("gameChange", { game, isNew: true }); // Надсилаємо ВСІМ (.emit) нову гру
+    io.emit("gameCreatedOrUpdated", { game, isNew: true }); // Надсилаємо ВСІМ (.emit) нову гру
   } catch (err) {
     console.error("Error creating game:", err);
     socketEmitError({
