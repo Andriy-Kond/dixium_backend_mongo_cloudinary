@@ -6,11 +6,15 @@ const GameSchema = new Schema(
   {
     gameName: String, // Game name
     gamePoster: String,
+    gameStatus: String, // "lobby" | "makingMove" | "voting" | "results" | "finished"
     isGameRunning: Boolean, // game started and running (players can't join anymore)
     isGameStarted: Boolean, // game started but not running (players can join)
-    hostPlayerId: String,
-    hostPlayerName: String,
-    storytellerId: String,
+
+    hostPlayerId: String, // id творця гри
+    hostPlayerName: String, // Ім'я творця гри
+    storytellerId: String, // ID гравця, який зараз розповідає (той, хто робить перший хід)
+    currentTurn: Number, // 0
+
     cardsOnTable: [CardSchema], // Карти, які поклали на стіл під час голосування
     votes: { type: Map, of: String }, // Голоси гравців { playerId: cardId }
     scores: { type: Map, of: Number }, // Бали гравців { playerId: score }
@@ -24,6 +28,7 @@ const GameSchema = new Schema(
         name: String,
         avatarURL: String,
         hand: [CardSchema],
+        isStoryteller: Boolean, // false - Чи є цей гравець "розповідачем" на поточному ході
       },
     ], // List of players
 

@@ -3,10 +3,11 @@ import { socketEmitError } from "../socketEmitError.js";
 
 export const setFirstStoryteller = async ({
   currentGame,
-  player,
+  playerId,
   socket,
   io,
 }) => {
+  console.log(" currentGame:::", currentGame.storytellerId);
   console.log("setFirstStoryteller");
 
   const event = "firstStorytellerUpdated";

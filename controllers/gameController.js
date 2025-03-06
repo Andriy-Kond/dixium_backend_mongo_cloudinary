@@ -7,7 +7,12 @@ const getAllGames = async (req, res) => {
   console.log("get all games");
   const games = await Game.find();
 
-  res.json(games);
+  const normalizedGames = games.reduce((acc, game) => {
+    acc[game._id] = game;
+    return acc;
+  }, {});
+
+  res.json(normalizedGames);
 };
 
 const getCurrentGame = async (req, res) => {
