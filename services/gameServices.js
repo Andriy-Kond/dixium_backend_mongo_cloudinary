@@ -62,9 +62,8 @@ async function addPlayerToGame(game, player, isPlayerInGame) {
   if (!isPlayerInGame) {
     player.hand = [];
     game.players.push(player);
-    await game.save();
   }
-  // return game; // нащо?
+  return game;
 }
 
 // Приєднання сокета до кімнати

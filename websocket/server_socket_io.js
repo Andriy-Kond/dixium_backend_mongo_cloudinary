@@ -112,18 +112,13 @@ io.on("connection", socket => {
   const handleNewPlayersOrder = async ({ updatedGame }) =>
     newPlayersOrder({ updatedGame, socket, io });
 
-  const handleSetFirstStoryteller = async ({ currentGame, playerId }) => {
-    setFirstStoryteller({
-      currentGame,
-      playerId,
-      socket,
-      io,
-    });
+  const handleSetFirstStoryteller = async ({ currentGame }) => {
+    setFirstStoryteller({ currentGame, socket, io });
   }; //* in progress
 
   socket.on("createGame", handleGameCreate);
   socket.on("startOrJoinToGame", handleGameEntry);
-  socket.on("currentGame:run", handleGameRun);
+  socket.on("gameRun", handleGameRun);
   socket.on("deleteGame", handleGameDelete);
   socket.on("joinGameRoom", handleJoinToGame);
   socket.on("newPlayersOrder", handleNewPlayersOrder);

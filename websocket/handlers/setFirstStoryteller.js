@@ -1,19 +1,29 @@
-import { findGameAndUpdateOrFail } from "../../services/gameServices.js";
+import {
+  findGameAndUpdateOrFail,
+  findGameOrFail,
+} from "../../services/gameServices.js";
 import { socketEmitError } from "../socketEmitError.js";
 
-export const setFirstStoryteller = async ({
-  currentGame,
-  playerId,
-  socket,
-  io,
-}) => {
-  console.log(" currentGame:::", currentGame.storytellerId);
+export const setFirstStoryteller = async ({ currentGame, socket, io }) => {
+  console.log(" setFirstStoryteller >> currentGame:::", currentGame);
   console.log("setFirstStoryteller");
 
   const event = "firstStorytellerUpdated";
   try {
-    const game = await findGameAndUpdateOrFail(currentGame, socket, event);
-    if (!game) throw new Error(`Game error: the game is ${game}`);
+    const gameId = currentGame._id;
+    const game = await findGameOrFail(gameId, socket);
+    // const game = await findGameAndUpdateOrFail(currentGame, socket, event);
+    if (!game) throw new Error(`The game is ${game}`);
+
+    if (game.storytellerId) {
+      console.log("Storyteller already set");
+      return;
+    }
+
+    game.set({ ...currentGame }); // альтернатива Object.assign у mongooseDB
+    // Object.assign(game, { ...currentGame });
+
+    await game.save();
 
     io.to(currentGame._id).emit(event, { game });
   } catch (err) {

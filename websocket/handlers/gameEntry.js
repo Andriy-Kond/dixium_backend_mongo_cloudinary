@@ -30,6 +30,7 @@ export const gameEntry = async ({ gameId, player, socket, io }) => {
 
     // Add player if he still not in game
     await addPlayerToGame(game, player, isPlayerInGame);
+    await game.save();
 
     // Приєднуємо сокет до кімнати
     joinSocketToRoom(socket, gameId, player);
