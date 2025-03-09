@@ -9,7 +9,7 @@ export const gameRun = async ({ updatedGame, socket, io }) => {
     const game = await findGameAndUpdateOrFail(updatedGame, socket, event);
     if (!game) throw new Error(`The game is ${game}`);
 
-    io.to(updatedGame._id).emit(event, { game });
+    io.emit(event, { game }); // to all, for disable button "join to game"
   } catch (err) {
     console.error("Error in handling current game run:", err);
     socketEmitError({

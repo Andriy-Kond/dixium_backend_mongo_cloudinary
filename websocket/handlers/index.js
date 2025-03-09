@@ -5,3 +5,4 @@ export * from "./gameDelete.js";
 export * from "./newPlayersOrder.js";
 export * from "./gameRun.js";
 export * from "./setFirstStoryteller.js";
+export * from "./gameUpdateFirstTurn.js";

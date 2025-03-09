@@ -5,7 +5,10 @@ import {
 import { socketEmitError } from "../socketEmitError.js";
 
 export const setFirstStoryteller = async ({ currentGame, socket, io }) => {
-  console.log(" setFirstStoryteller >> currentGame:::", currentGame);
+  console.log(
+    " setFirstStoryteller >> currentGame:::",
+    currentGame.isFirstTurn,
+  );
   console.log("setFirstStoryteller");
 
   const event = "firstStorytellerUpdated";

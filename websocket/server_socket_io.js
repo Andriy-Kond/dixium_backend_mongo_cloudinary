@@ -8,6 +8,7 @@ import {
   gameDelete,
   gameEntry,
   gameRun,
+  gameUpdateFirstTurn,
   joinToGame,
   newPlayersOrder,
   setFirstStoryteller,
@@ -94,6 +95,9 @@ const changeStream = Game.watch();
 io.on("connection", socket => {
   console.log(`User connected: ${socket.id}`);
 
+  const handleGameUpdateFirstTurn = async ({ updatedGame }) =>
+    gameUpdateFirstTurn({ updatedGame, socket, io });
+
   const handleGameCreate = async ({ gameData }) =>
     gameCreate({ gameData, socket, io });
 
@@ -116,6 +120,7 @@ io.on("connection", socket => {
     setFirstStoryteller({ currentGame, socket, io });
   }; //* in progress
 
+  socket.on("gameUpdateFirstTurn", handleGameUpdateFirstTurn);
   socket.on("createGame", handleGameCreate);
   socket.on("startOrJoinToGame", handleGameEntry);
   socket.on("gameRun", handleGameRun);

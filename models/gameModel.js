@@ -9,6 +9,7 @@ const GameSchema = new Schema(
     gameStatus: String, // "lobby" | "makingMove" | "voting" | "results" | "finished"
     isGameRunning: Boolean, // game started and running (players can't join anymore)
     isGameStarted: Boolean, // game started but not running (players can join)
+    isFirstTurn: Boolean,
 
     hostPlayerId: String, // id творця гри
     hostPlayerName: String, // Ім'я творця гри
