@@ -118,7 +118,7 @@ io.on("connection", socket => {
 
   const handleSetFirstStoryteller = async ({ currentGame }) => {
     setFirstStoryteller({ currentGame, socket, io });
-  }; //* in progress
+  };
 
   socket.on("gameUpdateFirstTurn", handleGameUpdateFirstTurn);
   socket.on("createGame", handleGameCreate);
