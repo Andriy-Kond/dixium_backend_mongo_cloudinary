@@ -5,6 +5,15 @@ export const gameRun = async ({ updatedGame, socket, io }) => {
   console.log("handleGameRun");
 
   const event = "gameRunning";
+  if (updatedGame.players.length < 3) {
+    socketEmitError({
+      errorMessage:
+        "Game not started: quantity of players must be from 3 to 12",
+      socket,
+    });
+    return;
+  }
+
   try {
     const game = await findGameAndUpdateOrFail(updatedGame, socket, event);
     if (!game) throw new Error(`The game is ${game}`);

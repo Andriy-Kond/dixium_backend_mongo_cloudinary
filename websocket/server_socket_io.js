@@ -96,7 +96,7 @@ io.on("connection", socket => {
   console.log(`User connected: ${socket.id}`);
 
   const handleGameUpdateFirstTurn = async ({ updatedGame }) =>
-    gameUpdateFirstTurn({ updatedGame, socket, io });
+    gameUpdateFirstTurn({ updatedGame, socket });
 
   const handleGameCreate = async ({ gameData }) =>
     gameCreate({ gameData, socket, io });
