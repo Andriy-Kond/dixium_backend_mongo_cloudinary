@@ -4,6 +4,7 @@ import { app } from "../app.js";
 import { Game } from "../models/gameModel.js";
 
 import {
+  deleteUserFromGame,
   gameCreate,
   gameDelete,
   gameEntry,
@@ -120,6 +121,10 @@ io.on("connection", socket => {
     setFirstStoryteller({ currentGame, socket, io });
   };
 
+  const handleDeleteUserFromGame = async ({ updatedGame }) => {
+    deleteUserFromGame({ updatedGame, socket, io });
+  };
+
   socket.on("gameUpdateFirstTurn", handleGameUpdateFirstTurn);
   socket.on("createGame", handleGameCreate);
   socket.on("startOrJoinToGame", handleGameEntry);
@@ -129,6 +134,7 @@ io.on("connection", socket => {
   socket.on("newPlayersOrder", handleNewPlayersOrder);
 
   socket.on("setFirstStoryteller", handleSetFirstStoryteller);
+  socket.on("deleteUserFromGame", handleDeleteUserFromGame);
 
   socket.on("disconnect", () => {
     console.log(`Користувач відключився: ${socket.id}`);
