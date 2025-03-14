@@ -30,7 +30,7 @@ const GameSchema = new Schema(
         name: String,
         avatarURL: String,
         hand: [CardSchema],
-        isStoryteller: Boolean, // false - Чи є цей гравець "розповідачем" на поточному ході
+        isVoted: Boolean,
       },
     ], // List of players
 
