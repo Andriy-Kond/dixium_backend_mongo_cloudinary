@@ -1,17 +1,14 @@
-import {
-  findGameAndUpdateOrFail,
-  findGameOrFail,
-} from "../../services/gameServices.js";
+import { findGameOrFail } from "../../services/gameServices.js";
 import { socketEmitError } from "../socketEmitError.js";
 
-export const setFirstStoryteller = async ({ currentGame, socket, io }) => {
+export const setFirstStoryteller = async ({ updatedGame, socket, io }) => {
   console.log("setFirstStoryteller");
 
   const event = "firstStorytellerUpdated";
   try {
-    const gameId = currentGame._id;
+    const gameId = updatedGame._id;
     const game = await findGameOrFail(gameId, socket);
-    // const game = await findGameAndUpdateOrFail(currentGame, socket, event);
+    // const game = await findGameAndUpdateOrFail(updatedGame, socket, event);
     if (!game) throw new Error(`The game is ${game}`);
 
     if (game.storytellerId) {
@@ -19,12 +16,12 @@ export const setFirstStoryteller = async ({ currentGame, socket, io }) => {
       return;
     }
 
-    game.set({ ...currentGame }); // альтернатива Object.assign у mongooseDB
-    // Object.assign(game, { ...currentGame });
+    game.set({ ...updatedGame }); // альтернатива Object.assign у mongooseDB
+    // Object.assign(game, { ...updatedGame });
 
     await game.save();
 
-    io.to(currentGame._id).emit(event, { game });
+    io.to(updatedGame._id).emit(event, { game });
   } catch (err) {
     console.error("Error in handling set first storyteller:", err);
     socketEmitError({

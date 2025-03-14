@@ -7,3 +7,4 @@ export * from "./gameRun.js";
 export * from "./setFirstStoryteller.js";
 export * from "./gameUpdateFirstTurn.js";
 export * from "./deleteUserFromGame.js";
+export * from "./vote.js";
