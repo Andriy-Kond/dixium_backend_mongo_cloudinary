@@ -18,7 +18,7 @@ const GameSchema = new Schema(
     currentRound: Number, // 0
 
     cardsOnTable: [CardSchema], // Карти, які поклали на стіл під час голосування
-    votes: { type: Map, of: String }, // Голоси гравців { playerId: cardId }
+    votes: { type: Map, of: { type: Map, of: String } }, // Голоси гравців { playerId: {firstCard: firstCardId, second: secondCardId} }
     scores: { type: Map, of: Number }, // Бали гравців { playerId: score }
 
     // deckId: { type: Schema.Types.ObjectId, ref: "deck" },
