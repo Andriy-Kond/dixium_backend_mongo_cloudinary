@@ -30,6 +30,7 @@ const GameSchema = new Schema(
         name: String,
         avatarURL: String,
         hand: [CardSchema],
+        isGuessed: Boolean,
         isVoted: Boolean,
       },
     ], // List of players
