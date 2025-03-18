@@ -17,8 +17,16 @@ const GameSchema = new Schema(
     storytellerId: String, // ID гравця, який зараз розповідає (той, хто робить перший хід)
     currentRound: Number, // 0
 
-    cardsOnTable: [CardSchema], // Карти, які поклали на стіл під час голосування
-    votes: { type: Map, of: { type: Map, of: String } }, // Голоси гравців { playerId: {firstCard: firstCardId, second: secondCardId} }
+    cardsOnTable: [
+      {
+        cardName: String,
+        public_id: String, // Public card id from Cloudinary
+        url: String, // Card url from Cloudinary
+        owner: String,
+      },
+    ], // Карти, які поклали на стіл під час голосування
+    votes: { type: Map, of: { type: Map, of: String } }, // Голоси гравців
+    //     { playerId: {firstVotedCardId: firstVotedCardId, secondVotedCardId: secondVotedCardId} }
     scores: { type: Map, of: Number }, // Бали гравців { playerId: score }
 
     // deckId: { type: Schema.Types.ObjectId, ref: "deck" },
@@ -35,7 +43,8 @@ const GameSchema = new Schema(
       },
     ], // List of players
 
-    deck: [CardSchema], // Deck of cards
+    deck: [CardSchema],
+    // Deck of cards
 
     discardPile: [CardSchema],
   },
