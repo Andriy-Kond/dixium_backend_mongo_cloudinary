@@ -2,7 +2,7 @@ import { findGameAndUpdateOrFail } from "../../services/gameServices.js";
 import { socketEmitError } from "../socketEmitError.js";
 
 export const vote = async ({ updatedGame, socket, io }) => {
-  console.log("handleGuess");
+  console.log("vote");
   const event = "playerVoteSuccess";
 
   try {

@@ -9,3 +9,4 @@ export * from "./gameUpdateFirstTurn.js";
 export * from "./deleteUserFromGame.js";
 export * from "./guess.js";
 export * from "./vote.js";
+export * from "./roundFinish.js";

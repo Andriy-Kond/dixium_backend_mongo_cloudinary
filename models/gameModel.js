@@ -34,7 +34,7 @@ const GameSchema = new Schema(
 
     players: [
       {
-        _id: String,
+        _id: String, //? Schema.Types.ObjectId ??? чи видалити повністю?
         name: String,
         avatarURL: String,
         hand: [CardSchema],
@@ -47,6 +47,20 @@ const GameSchema = new Schema(
     // Deck of cards
 
     discardPile: [CardSchema],
+    roundResults: [
+      {
+        cardName: String,
+        public_id: String,
+        url: String,
+        owner: String,
+        votesForThisCard: [
+          {
+            playerName: String,
+            voteCount: Number,
+          },
+        ],
+      },
+    ],
   },
 
   { versionKey: false, timestamps: true },

@@ -15,6 +15,7 @@ import {
   setFirstStoryteller,
   guess,
   vote,
+  roundFinish,
 } from "./handlers/index.js";
 
 export const httpServer = createServer(app);
@@ -131,6 +132,11 @@ io.on("connection", socket => {
     vote({ updatedGame, socket, io });
   };
 
+  const handleRoundFinish = async ({ updatedGame }) => {
+    console.log("handleRoundFinish");
+    roundFinish({ updatedGame, socket, io });
+  };
+
   const handleDeleteUserFromGame = async ({ updatedGame }) => {
     deleteUserFromGame({ updatedGame, socket, io });
   };
@@ -146,6 +152,7 @@ io.on("connection", socket => {
   socket.on("setFirstStoryteller", handleSetFirstStoryteller);
   socket.on("playerGuessing", handleGuess);
   socket.on("playerVoting", handleVote);
+  socket.on("roundFinish", handleRoundFinish);
   socket.on("deleteUserFromGame", handleDeleteUserFromGame);
 
   socket.on("disconnect", () => {
