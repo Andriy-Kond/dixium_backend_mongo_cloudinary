@@ -6,8 +6,7 @@ export const setFirstStoryteller = async ({ updatedGame, socket, io }) => {
 
   const event = "firstStorytellerUpdated";
   try {
-    const gameId = updatedGame._id;
-    const game = await findGameOrFail(gameId, socket);
+    const game = await findGameOrFail(updatedGame._id, socket);
     // const game = await findGameAndUpdateOrFail(updatedGame, socket, event);
     if (!game) throw new Error(`The game is ${game}`);
 
@@ -18,7 +17,6 @@ export const setFirstStoryteller = async ({ updatedGame, socket, io }) => {
 
     game.set({ ...updatedGame }); // альтернатива Object.assign у mongooseDB
     // Object.assign(game, { ...updatedGame });
-
     await game.save();
 
     io.to(updatedGame._id).emit(event, { game });

@@ -2,7 +2,7 @@ import { findGameAndUpdateOrFail } from "../../services/gameServices.js";
 import { socketEmitError } from "../socketEmitError.js";
 
 export const gameUpdateFirstTurn = async ({ updatedGame, socket }) => {
-  console.log("handleGameUpdate");
+  console.log("gameUpdateFirstTurn");
   console.log(" gameUpdate >> updatedGame:::", updatedGame.isFirstTurn);
 
   const event = "gameFirstTurnUpdated";

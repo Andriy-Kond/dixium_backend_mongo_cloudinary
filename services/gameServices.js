@@ -60,10 +60,11 @@ async function findGameAndUpdateOrFail(currentGame, socket, event) {
 // Додавання гравця до гри
 async function addPlayerToGame(game, player, isPlayerInGame) {
   if (!isPlayerInGame) {
-    player.hand = [];
+    // player.hand = []; // Встановлюється у GameList на клієнті
     game.players.push(player);
   }
-  return game;
+
+  return game; // ?? нащо?
 }
 
 // Приєднання сокета до кімнати

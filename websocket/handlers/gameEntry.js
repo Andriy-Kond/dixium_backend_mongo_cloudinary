@@ -8,6 +8,7 @@ import { socketEmitError } from "../socketEmitError.js";
 
 export const gameEntry = async ({ gameId, player, socket, io }) => {
   console.log("gameEntry");
+
   try {
     const game = await findGameOrFail(gameId, socket);
     if (!game) throw new Error(`The game is ${game}`);
@@ -36,7 +37,7 @@ export const gameEntry = async ({ gameId, player, socket, io }) => {
     joinSocketToRoom(socket, gameId, player);
 
     // Оновлюємо гру для всіх і сповіщаємо кімнату
-    io.emit("gameCreatedOrUpdated", { game });
+    io.emit("gameCreatedOrUpdated", { game, player });
 
     notifyRoom({
       io,
