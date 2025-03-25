@@ -22,7 +22,7 @@ const GameSchema = new Schema(
         cardName: String,
         public_id: String, // Public card id from Cloudinary
         url: String, // Card url from Cloudinary
-        owner: String,
+        ownerId: String,
       },
     ], // Карти, які поклали на стіл під час голосування
     votes: { type: Map, of: { type: Map, of: String } }, // Голоси гравців
@@ -47,12 +47,14 @@ const GameSchema = new Schema(
     // Deck of cards
 
     discardPile: [CardSchema],
+
     roundResults: [
       {
+        cardId: String,
         cardName: String,
-        public_id: String,
         url: String,
-        owner: String,
+        ownerId: String,
+        ownerName: String,
         votesForThisCard: [
           {
             playerName: String,

@@ -17,6 +17,8 @@ import {
   startVoting,
   vote,
   roundFinish,
+  startNewRound,
+  setNextStoryteller,
 } from "./handlers/index.js";
 
 export const httpServer = createServer(app);
@@ -109,6 +111,10 @@ io.on("connection", socket => {
   const handleGameEntry = async ({ gameId, player }) =>
     gameEntry({ gameId, player, socket, io });
 
+  const handleDeleteUserFromGame = async ({ updatedGame }) => {
+    deleteUserFromGame({ updatedGame, socket, io });
+  };
+
   const handleGameRun = async ({ updatedGame }) =>
     gameRun({ updatedGame, socket, io });
 
@@ -123,6 +129,10 @@ io.on("connection", socket => {
 
   const handleSetFirstStoryteller = async ({ updatedGame }) => {
     setFirstStoryteller({ updatedGame, socket, io });
+  };
+
+  const handleSetNextStoryteller = async ({ updatedGame }) => {
+    setNextStoryteller({ updatedGame, socket, io });
   };
 
   const handleGuess = async ({ updatedGame }) => {
@@ -142,24 +152,27 @@ io.on("connection", socket => {
     roundFinish({ updatedGame, socket, io });
   };
 
-  const handleDeleteUserFromGame = async ({ updatedGame }) => {
-    deleteUserFromGame({ updatedGame, socket, io });
+  const handleStartNewRound = async ({ updatedGame }) => {
+    console.log("handleStartNewRound");
+    startNewRound({ updatedGame, socket, io });
   };
 
   socket.on("gameUpdateFirstTurn", handleGameUpdateFirstTurn);
   socket.on("createGame", handleGameCreate);
   socket.on("startOrJoinToGame", handleGameEntry);
+  socket.on("deleteUserFromGame", handleDeleteUserFromGame);
   socket.on("gameRun", handleGameRun);
   socket.on("deleteGame", handleGameDelete);
   socket.on("joinGameRoom", handleJoinToGame);
   socket.on("newPlayersOrder", handleNewPlayersOrder);
 
   socket.on("setFirstStoryteller", handleSetFirstStoryteller);
+  socket.on("setNextStoryteller", handleSetNextStoryteller);
   socket.on("playerGuessing", handleGuess);
   socket.on("startVoting", handleStartVoting);
   socket.on("playerVoting", handleVote);
   socket.on("roundFinish", handleRoundFinish);
-  socket.on("deleteUserFromGame", handleDeleteUserFromGame);
+  socket.on("startNewRound", handleStartNewRound);
 
   socket.on("disconnect", () => {
     console.log(`Користувач відключився: ${socket.id}`);

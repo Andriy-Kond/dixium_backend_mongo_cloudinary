@@ -10,13 +10,16 @@ export const setFirstStoryteller = async ({ updatedGame, socket, io }) => {
     // const game = await findGameAndUpdateOrFail(updatedGame, socket, event);
     if (!game) throw new Error(`The game is ${game}`);
 
+    // Якщо оповідач уже встановлений, відхиляємо запит
     if (game.storytellerId) {
       console.log("Storyteller already set");
+      socketEmitError({ errorMessage: "Storyteller already set", socket });
+
       return;
     }
 
-    game.set({ ...updatedGame }); // альтернатива Object.assign у mongooseDB
     // Object.assign(game, { ...updatedGame });
+    game.set({ ...updatedGame }); // альтернатива Object.assign у mongooseDB
     await game.save();
 
     io.to(updatedGame._id).emit(event, { game });
