@@ -23,6 +23,12 @@ const GameSchema = new Schema(
         public_id: String, // Public card id from Cloudinary
         url: String, // Card url from Cloudinary
         ownerId: String,
+        // Випадкове розміщення карт на столі:
+        position: {
+          top: Number, // відсотки, наприклад, 25
+          left: Number, // відсотки, наприклад, 35
+        },
+        rotation: Number, // градуси, наприклад, 45
       },
     ], // Карти, які поклали на стіл під час голосування
     votes: { type: Map, of: { type: Map, of: String } }, // Голоси гравців
