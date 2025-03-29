@@ -1,7 +1,7 @@
 import cloudinary from "./cloudinaryConfig.js";
 
 // Отримати список усіх файлів у теці
-export async function getImagePath(folderName) {
+export async function getImagePath(folderName, isTransform) {
   const response = await cloudinary.api.resources({
     type: "upload",
     prefix: folderName, // Отримати всі файли у теці
@@ -17,22 +17,24 @@ export async function getImagePath(folderName) {
 
   // З трансформацією:
   return response.resources.map(file => {
-    const transformedUrl = cloudinary.url(file.public_id, {
-      transformation: [
-        {
-          width: 500,
-          height: 800,
-          crop: "scale", // Масштабує зображення до точних розмірів без обрізання
+    const transformedUrl = isTransform
+      ? cloudinary.url(file.public_id, {
+          transformation: [
+            {
+              width: 500,
+              height: 800,
+              crop: "scale", // Масштабує зображення до точних розмірів без обрізання
 
-          // crop: "fit", // Зображення масштабується, зберігаючи пропорції, і вписується в межі 500x800
+              // crop: "fit", // Зображення масштабується, зберігаючи пропорції, і вписується в межі 500x800
 
-          // З фоном:
-          // crop: "pad", // Додає заповнення (padding), якщо пропорції не збігаються
-          // background: "auto", // Автоматично підбирає колір фону
-        },
-      ],
-      secure: true, // Використовуємо HTTPS
-    });
+              // З фоном:
+              // crop: "pad", // Додає заповнення (padding), якщо пропорції не збігаються
+              // background: "auto", // Автоматично підбирає колір фону
+            },
+          ],
+          secure: true, // Використовуємо HTTPS
+        })
+      : cloudinary.url(file.public_id, { secure: true });
 
     return {
       cardName: file.public_id.split("/").pop(),
