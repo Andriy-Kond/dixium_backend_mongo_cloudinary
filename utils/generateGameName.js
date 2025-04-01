@@ -1,6 +1,9 @@
-import { masculine, feminine, neuter } from "../resources/adjectivesNouns.js";
-import { rhymingPairs } from "../resources/rhymingPairs.js";
-
+import {
+  masculine,
+  feminine,
+  neuter,
+} from "../resources/adjectivesNounsNeuterUA.js";
+import { rhymingPairsUA } from "../resources/rhymingPairsUA.js";
 import { getRandomItem } from "./getRandomItem.js";
 
 export const generateGameName = () => {
@@ -8,13 +11,13 @@ export const generateGameName = () => {
   const genderKey = getRandomItem(["masculine", "feminine", "neuter"]);
   const gender = genders[genderKey];
 
-  const adjective = getRandomItem(gender.adjectives);
-  const noun = getRandomItem(gender.nouns);
-
-  const rhymingPair = getRandomItem(rhymingPairs);
   const useRhyming = Math.random() > 0.5; // 50% шанс використати риму
 
-  const gameName = useRhyming ? rhymingPair : `${adjective} ${noun}`;
+  if (useRhyming) return getRandomItem(rhymingPairsUA);
+  else {
+    const adjective = getRandomItem(gender.adjectives);
+    const noun = getRandomItem(gender.nouns);
 
-  return gameName;
+    return `${adjective} ${noun}`;
+  }
 };

@@ -1,7 +1,4 @@
-//   nouns: ["", "", "", "", ],
-// };
-
-export const masculine = {
+export const masculineUA = {
   adjectives: [
     "Тихий",
     "Тіньовий",
@@ -134,7 +131,7 @@ export const masculine = {
   ],
 };
 
-export const feminine = {
+export const feminineUA = {
   adjectives: [
     "Тіньова",
     "Чарівна",
@@ -275,7 +272,7 @@ export const feminine = {
   ],
 };
 
-export const neuter = {
+export const neuterUA = {
   adjectives: [
     "Чарівне",
     "Загадкове",
