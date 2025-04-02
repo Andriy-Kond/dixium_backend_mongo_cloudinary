@@ -58,7 +58,7 @@ const GameSchema = new Schema(
       {
         cardId: String,
         cardName: String,
-        url: String,
+        public_id: String,
         ownerId: String,
         ownerName: String,
         votesForThisCard: [

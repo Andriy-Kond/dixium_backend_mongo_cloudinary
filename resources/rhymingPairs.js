@@ -1,4 +1,4 @@
-export const rhymingPairsUA = [
+export const rhymingPairs = [
   "Мелодія Мрій",
   "Загадки Вітру",
   "Фантазія Слів",
