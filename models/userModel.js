@@ -51,7 +51,8 @@ const mongooseUserSchema = new Schema(
     },
     password: {
       type: String,
-      required: [true, "Password is required"],
+      // Пароль не обов’язковий для Google-авторизації, тому його треба прибрати
+      // required: [true, "Password is required"],
       validate: passwordValidator,
     },
     token: {
@@ -62,6 +63,16 @@ const mongooseUserSchema = new Schema(
       type: String,
       required: true,
       default: "",
+    },
+    googleId: {
+      type: String,
+      unique: true,
+      sparse: true, // Дозволяє null для не-Google користувачів (щоб уникнути конфліктів унікальності для користувачів без цих полів)
+    },
+    appleId: {
+      type: String,
+      unique: true,
+      sparse: true,
     },
   },
   { versionKey: false, timestamps: true },

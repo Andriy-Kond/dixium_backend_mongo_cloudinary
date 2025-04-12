@@ -23,6 +23,9 @@ authRouter.post(
   authController.login, // register new user
 );
 
+// login by google
+authRouter.post("/google", authController.googleLogin);
+
 // take token from .../current
 authRouter.get(
   "/current",

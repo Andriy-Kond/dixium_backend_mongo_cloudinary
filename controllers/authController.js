@@ -8,8 +8,10 @@ import jwt from "jsonwebtoken";
 import { User } from "../models/userModel.js";
 import { HttpError } from "../utils/HttpError.js";
 import { tryCatchDecorator } from "../utils/tryCatchDecorator.js";
+import { OAuth2Client } from "google-auth-library";
 
-const { SECRET_KEY = "" } = process.env;
+const { SECRET_KEY = "", GOOGLE_CLIENT_ID = "" } = process.env;
+const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 const register = async (req, res) => {
   //# Adding custom error message for 409 status when you validate uniq field (for example "email")
@@ -70,6 +72,55 @@ const login = async (req, res) => {
   res.json({ ...user._doc, token });
 };
 
+const googleLogin = async (req, res) => {
+  // Перевіряє Google-токен.
+  // Шукає користувача за googleId або email.
+  // Якщо користувач із таким email уже є (наприклад, через email-авторизацію), пов'язує googleId.
+  // Якщо користувача немає, створює нового з даними від Google.
+  // Генерує JWT-токен, як і для email-авторизації.
+  const { token } = req.body;
+  try {
+    const ticket = await googleClient.verifyIdToken({
+      idToken: token,
+      audience: GOOGLE_CLIENT_ID,
+    });
+    const payload = ticket.getPayload();
+    const { sub: googleId, email, name } = payload;
+
+    let user = await User.findOne({ googleId });
+    if (!user) {
+      user = await User.findOne({ email });
+      if (user) {
+        // Пов’язуємо Google ID із наявним користувачем
+        user.googleId = googleId;
+      } else {
+        // Створюємо нового користувача
+        user = new User({
+          googleId,
+          email,
+          name: name || `User_${googleId}`,
+          avatarURL: gravatar.url(email, {
+            s: 200,
+            protocol: true,
+            d: "robohash",
+          }),
+        });
+      }
+      await user.save();
+    }
+
+    const jwtToken = jwt.sign({ id: user._id }, SECRET_KEY, {
+      expiresIn: "23h",
+    });
+    user.token = jwtToken;
+    await user.save();
+
+    res.json({ ...user._doc, token: jwtToken });
+  } catch (error) {
+    throw HttpError({ status: 401, message: "Invalid Google token" });
+  }
+};
+
 // Check whether token is still valid and send name&email
 const getCurrentUser = (req, res) => {
   const { email, name, avatarURL } = req.user;
@@ -112,6 +163,7 @@ const changeAvatar = async (req, res) => {
 export const authController = {
   register: tryCatchDecorator(register),
   login: tryCatchDecorator(login),
+  googleLogin: tryCatchDecorator(googleLogin),
   getCurrentUser: tryCatchDecorator(getCurrentUser),
   logout: tryCatchDecorator(logout),
   changeAvatar: tryCatchDecorator(changeAvatar),
