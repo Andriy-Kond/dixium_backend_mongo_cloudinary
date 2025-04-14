@@ -19,6 +19,7 @@ import {
   roundFinish,
   startNewRound,
   setNextStoryteller,
+  gameFindActive,
 } from "./handlers/index.js";
 
 export const httpServer = createServer(app);
@@ -157,6 +158,11 @@ io.on("connection", socket => {
     startNewRound({ updatedGame, socket, io });
   };
 
+  const handleGameFindActive = async ({ searchGameNumber }) => {
+    console.log("handleFindGame");
+    gameFindActive({ searchGameNumber, socket, io });
+  };
+
   socket.on("gameUpdateFirstTurn", handleGameUpdateFirstTurn);
   socket.on("createGame", handleGameCreate);
   socket.on("startOrJoinToGame", handleGameEntry);
@@ -173,6 +179,8 @@ io.on("connection", socket => {
   socket.on("playerVoting", handleVote);
   socket.on("roundFinish", handleRoundFinish);
   socket.on("startNewRound", handleStartNewRound);
+
+  socket.on("gameFindActive", handleGameFindActive); // пошук гри (активної)
 
   socket.on("disconnect", () => {
     console.log(`Користувач відключився: ${socket.id}`);

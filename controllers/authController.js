@@ -9,6 +9,7 @@ import { User } from "../models/userModel.js";
 import { HttpError } from "../utils/HttpError.js";
 import { tryCatchDecorator } from "../utils/tryCatchDecorator.js";
 import { OAuth2Client } from "google-auth-library";
+import { generateUniquePlayerGameId } from "../utils/generateUniquePlayerGameId.js";
 
 const { SECRET_KEY = "", GOOGLE_CLIENT_ID = "" } = process.env;
 const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
@@ -31,10 +32,14 @@ const register = async (req, res) => {
     d: "robohash",
   });
 
+  // Унікальний номер
+  const playerGameId = await generateUniquePlayerGameId();
+
   const newUser = await User.create({
     ...req.body,
     password: hashedPassword,
     avatarURL: defaultAvatarURL,
+    playerGameId,
   });
 
   newUser.token = jwt.sign({ id: newUser._id }, SECRET_KEY, {
@@ -85,25 +90,43 @@ const googleLogin = async (req, res) => {
       audience: GOOGLE_CLIENT_ID,
     });
     const payload = ticket.getPayload();
-    const { sub: googleId, email, name } = payload;
+    // console.log(" googleLogin >> payload:::", payload);
+    //  googleLogin >> payload::: {
+    //   iss: 'https://accounts.google.com',
+    //   azp: '398199371863-sp740c3kan5vij6v1qr98a03e1ouc2qt.apps.googleusercontent.com',
+    //   aud: '398199371863-sp740c3kan5vij6v1qr98a03e1ouc2qt.apps.googleusercontent.com',
+    //   sub: '105744500484448866696',
+    //   email: '5thssswebua@gmail.com',
+    //   email_verified: true,
+    //   nbf: 1744620638,
+    //   name: 'Sss Sss',
+    //   picture: 'https://lh3.googleusercontent.com/a/ACg8ocKKZDiy4VMILmoJosri_X0m0qhd7tI9QMqCrmlMzm9M4F7EwA=s96-c',
+    //   given_name: 'Sss',
+    //   family_name: 'Sss',
+    //   iat: 1744620938,
+    //   exp: 1744624538,
+    //   jti: '02d6afa7250a2ee0f047166970d038b37908f196'
+    // }
+    const { sub: googleId, email, given_name, picture } = payload;
 
     let user = await User.findOne({ googleId });
+
     if (!user) {
       user = await User.findOne({ email });
       if (user) {
-        // Пов’язуємо Google ID із наявним користувачем
+        // Пов'язую Google ID із наявним користувачем
         user.googleId = googleId;
       } else {
-        // Створюємо нового користувача
+        // Унікальний номер:
+        const playerGameId = await generateUniquePlayerGameId();
+
+        // Створення нового користувача
         user = new User({
           googleId,
           email,
-          name: name || `User_${googleId}`,
-          avatarURL: gravatar.url(email, {
-            s: 200,
-            protocol: true,
-            d: "robohash",
-          }),
+          name: given_name || `User_${googleId}`,
+          avatarURL: picture,
+          playerGameId,
         });
       }
       await user.save();

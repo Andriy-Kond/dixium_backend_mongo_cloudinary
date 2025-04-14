@@ -1,12 +1,25 @@
 import { Schema, model } from "mongoose";
 import { handleMongooseError } from "../utils/handleMongooseError.js";
 import { CardSchema } from "./cardSchema.js";
+import {
+  FINISH,
+  GUESSING,
+  LOBBY,
+  ROUND_RESULTS,
+  VOTING,
+} from "../utils/generals/constants.js";
 
 const GameSchema = new Schema(
   {
     gameName: String, // Game name
     gamePoster: String,
-    gameStatus: String, // "lobby" | "makingMove" | "voting" | "results" | "finished"
+    // gameStatus: String,
+    gameStatus: {
+      type: String,
+      enum: [LOBBY, GUESSING, VOTING, ROUND_RESULTS, FINISH],
+      default: LOBBY,
+    },
+
     isGameRunning: Boolean, // game started and running (players can't join anymore)
     isGameStarted: Boolean, // game started but not running (players can join)
     isFirstTurn: Boolean,
@@ -69,6 +82,12 @@ const GameSchema = new Schema(
         ],
       },
     ],
+
+    playerGameId: {
+      type: Number,
+      required: true,
+      unique: true, // Забезпечує, що один гравець може мати лише одну гру
+    },
   },
 
   { versionKey: false, timestamps: true },

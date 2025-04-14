@@ -13,3 +13,4 @@ export * from "./startVoting.js";
 export * from "./vote.js";
 export * from "./roundFinish.js";
 export * from "./startNewRound.js";
+export * from "./gameFindActive.js";

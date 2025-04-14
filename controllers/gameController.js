@@ -16,31 +16,33 @@ const getAllGames = async (req, res) => {
 };
 
 const getCurrentGame = async (req, res) => {
-  const game = await Game.findById(req.params.id);
+  console.log("getCurrentGame");
+  // console.log("req.params:::", req.params); // req.params::: { id: '3510' }
+  const game = await Game.findOne({ playerGameId: req.params.id });
 
   res.json(game);
 };
 
-const createGame = async (req, res) => {
-  console.log("creating new game");
+// const createGame = async (req, res) => {
+//   console.log("creating new game");
 
-  // opt.1
-  // const newGame = await Game.create(req.body); // First db query
-  // newGame.gameName = generateGameName();
-  // newGame.gamePoster = getRandomItem(newGame.deck).url;
-  // await newGame.save(); // Second db query
+//   // opt.1
+//   // const newGame = await Game.create(req.body); // First db query
+//   // newGame.gameName = generateGameName();
+//   // newGame.gamePoster = getRandomItem(newGame.deck).url;
+//   // await newGame.save(); // Second db query
 
-  // opt.2
-  // const newGame = new Game(req.body);
-  // newGame.gameName = generateGameName();
-  // newGame.gamePoster = getRandomItem(newGame.deck).url;
-  // await newGame.save(); // One single db query
+//   // opt.2
+//   // const newGame = new Game(req.body);
+//   // newGame.gameName = generateGameName();
+//   // newGame.gamePoster = getRandomItem(newGame.deck).url;
+//   // await newGame.save(); // One single db query
 
-  // opt.2.1
-  const newGame = await createNewGame(req.body);
+//   // opt.2.1
+//   const newGame = await createNewGame(req.body);
 
-  res.status(200).json(newGame);
-};
+//   res.status(200).json(newGame);
+// };
 
 const updateGame = async (req, res) => {
   const game = await Game.findByIdAndUpdate(req.params.gameId, req.body, {
@@ -60,7 +62,7 @@ const removeGame = async (req, res) => {
 export const gameController = {
   getAllGames: tryCatchDecorator(getAllGames),
   getCurrentGame: tryCatchDecorator(getCurrentGame),
-  createGame: tryCatchDecorator(createGame),
+  // createGame: tryCatchDecorator(createGame),
   removeGame: tryCatchDecorator(removeGame),
   updateGame: tryCatchDecorator(updateGame),
 };

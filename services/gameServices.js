@@ -2,16 +2,62 @@ import { Game } from "../models/gameModel.js";
 import { socketEmitError } from "../websocket/socketEmitError.js";
 import { generateGameName } from "../utils/generateGameName.js";
 import { getRandomItem } from "../utils/getRandomItem.js";
+import {
+  LOBBY,
+  GUESSING,
+  VOTING,
+  ROUND_RESULTS,
+  FINISH,
+} from "../utils/generals/constants.js";
+import { HttpError } from "../utils/HttpError.js";
+import { User } from "../models/userModel.js";
 
 // Створення нової гри
 async function createNewGame(gameData) {
-  const newGame = new Game(gameData);
+  console.log("createNewGame");
 
+  const user = await User.findOne({ _id: gameData.hostPlayerId });
+
+  // Перевірка, чи у гравця вже є активна гра
+  const existingGame = await Game.findOne({
+    playerGameId: user.playerGameId,
+  });
+
+  if (existingGame && existingGame.status !== FINISH) {
+    console.log("error --- existingGame");
+    throw HttpError({
+      status: 409,
+      message: "You already have an active game. Finish or delete it first.",
+    });
+    // return new Error(
+    //   "You already have an active game. Finish or delete it first.",
+    // );
+  }
+
+  const newGame = new Game(gameData);
   newGame.gameName = generateGameName();
   newGame.gamePoster = getRandomItem(newGame.deck).public_id;
+  newGame.playerGameId = user.playerGameId;
   await newGame.save();
 
   return newGame;
+}
+
+// Пошук незавершеної гри
+async function gameFindActiveCurrent(searchGameNumber) {
+  const game = await Game.findOne({
+    playerGameId: Number(searchGameNumber),
+    gameStatus: { $in: [LOBBY, GUESSING, VOTING, ROUND_RESULTS] }, // Шукаю лише активні ігри
+  });
+
+  if (!game) {
+    throw HttpError({
+      status: 404,
+      message: `Game with number ${searchGameNumber} not found or already finished`,
+    });
+  }
+
+  return game;
 }
 
 // Перевірка, чи гра існує
@@ -98,6 +144,7 @@ async function findGameAndDeleteOrFail(gameId, socket, event) {
 
 export {
   createNewGame,
+  gameFindActiveCurrent,
   findGameOrFail,
   findGameAndUpdateOrFail,
   addPlayerToGame,

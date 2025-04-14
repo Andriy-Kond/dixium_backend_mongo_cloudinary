@@ -55,25 +55,15 @@ const mongooseUserSchema = new Schema(
       // required: [true, "Password is required"],
       validate: passwordValidator,
     },
-    token: {
-      type: String,
-      default: "",
-    },
-    avatarURL: {
-      type: String,
-      required: true,
-      default: "",
-    },
+    token: { type: String, default: "" },
+    avatarURL: { type: String, required: true, default: "" },
     googleId: {
       type: String,
       unique: true,
       sparse: true, // Дозволяє null для не-Google користувачів (щоб уникнути конфліктів унікальності для користувачів без цих полів)
     },
-    appleId: {
-      type: String,
-      unique: true,
-      sparse: true,
-    },
+    appleId: { type: String, unique: true, sparse: true },
+    playerGameId: { type: Number, unique: true },
   },
   { versionKey: false, timestamps: true },
 );
