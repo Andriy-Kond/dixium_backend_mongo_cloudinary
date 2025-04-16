@@ -16,4 +16,4 @@ export const gameDelete = async ({ gameId, socket, io }) => {
       socket,
     });
   }
-}; //* OK
+};

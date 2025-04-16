@@ -15,6 +15,7 @@ const { SECRET_KEY = "", GOOGLE_CLIENT_ID = "" } = process.env;
 const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 const register = async (req, res) => {
+  console.log("register >>>");
   //# Adding custom error message for 409 status when you validate uniq field (for example "email")
   const { email, password } = req.body;
   const user = await User.findOne({ email }); // Find user with this email. If not found, returns "null"
@@ -52,6 +53,7 @@ const register = async (req, res) => {
 };
 
 const login = async (req, res) => {
+  console.log("login");
   const { email, password } = req.body;
   const user = await User.findOne({ email });
 
@@ -62,7 +64,7 @@ const login = async (req, res) => {
     });
   }
 
-  const comparePass = await bcrypt.compare(password, user.password);
+  const comparePass = bcrypt.compare(password, user.password);
   if (!comparePass) {
     throw HttpError({
       status: 401,
@@ -71,13 +73,15 @@ const login = async (req, res) => {
   }
 
   // Create and send token
-  const token = jwt.sign({ id: user._id }, SECRET_KEY, { expiresIn: "23h" });
-  await User.findByIdAndUpdate(user._id, { token });
-
-  res.json({ ...user._doc, token });
+  const jwtToken = jwt.sign({ id: user._id }, SECRET_KEY, { expiresIn: "23h" });
+  await User.findByIdAndUpdate(user._id, { token: jwtToken });
+  // user.token = jwtToken;
+  // await user.save();
+  res.json({ ...user._doc, token: jwtToken });
 };
 
 const googleLogin = async (req, res) => {
+  console.log("googleLogin");
   // Перевіряє Google-токен.
   // Шукає користувача за googleId або email.
   // Якщо користувач із таким email уже є (наприклад, через email-авторизацію), пов'язує googleId.

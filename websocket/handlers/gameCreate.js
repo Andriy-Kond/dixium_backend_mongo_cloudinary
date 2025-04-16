@@ -11,6 +11,7 @@ export const gameCreate = async ({ gameData, socket, io }) => {
 
     // Оповіщення всіх під'єднаних клієнтів про створену гру
     io.emit("gameCreatedOrUpdated", { game, isNew: true }); // Надсилаємо ВСІМ (.emit) нову гру
+    console.log(" gameCreate:::", game.gameName);
   } catch (err) {
     console.error("Error creating game:", err);
 
