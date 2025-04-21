@@ -7,11 +7,11 @@ export const gameFindActive = async ({ searchGameNumber, socket, io }) => {
     const game = await gameFindActiveCurrent(searchGameNumber);
     // if (!game) throw new Error(`The active game not found: ${game}`);
     if (!game)
-      io.emit("gameFindActiveSuccess", {
+      socket.emit("gameFindActiveSuccess", {
         gameNumber: searchGameNumber,
         message: `A game with number ${searchGameNumber} not found`,
       });
-    else io.emit("gameFindActiveSuccess", { game });
+    else socket.emit("gameFindActiveSuccess", { game });
   } catch (err) {
     console.error("Error finding game:", err);
     socketEmitError({
