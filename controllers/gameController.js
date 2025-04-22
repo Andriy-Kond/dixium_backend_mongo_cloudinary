@@ -1,7 +1,7 @@
 import { Game } from "../models/gameModel.js";
 import { tryCatchDecorator } from "../utils/tryCatchDecorator.js";
 
-import { createNewGame } from "../services/gameServices.js";
+// import { createNewGame } from "../services/gameServices.js";
 
 const getAllGames = async (req, res) => {
   console.log("get all games");

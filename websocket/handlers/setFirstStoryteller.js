@@ -1,4 +1,4 @@
-import { findGameOrFail } from "../../services/gameServices.js";
+import { findGameByIdOrFail } from "../../services/gameServices.js";
 import { socketEmitError } from "../socketEmitError.js";
 
 export const setFirstStoryteller = async ({ updatedGame, socket, io }) => {
@@ -6,9 +6,8 @@ export const setFirstStoryteller = async ({ updatedGame, socket, io }) => {
 
   const event = "firstStorytellerUpdated";
   try {
-    const game = await findGameOrFail(updatedGame._id, socket);
-    // const game = await findGameAndUpdateOrFail(updatedGame, socket, event);
-    if (!game) throw new Error(`The game is ${game}`);
+    const { game, errorMessage } = await findGameByIdOrFail(updatedGame._id);
+    if (errorMessage) return socketEmitError({ errorMessage, socket });
 
     // Якщо оповідач уже встановлений, відхиляємо запит
     if (game.storytellerId) {

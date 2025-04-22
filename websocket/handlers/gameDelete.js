@@ -7,7 +7,7 @@ export const gameDelete = async ({ gameId, userId, socket, io }) => {
   const event = "gameWasDeleted";
   try {
     const game = await findGameAndDeleteOrFail(gameId, socket, event);
-    console.log(" gameDelete >> game:::", game);
+
     if (!game) throw new Error(`The game is ${game}`);
 
     const user = await User.findById(userId);

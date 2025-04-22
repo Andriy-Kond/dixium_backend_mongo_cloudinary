@@ -1,5 +1,5 @@
 import {
-  findGameOrFail,
+  findGameByIdOrFail,
   joinSocketToRoom,
 } from "../../services/gameServices.js";
 import { socketEmitError } from "../socketEmitError.js";
@@ -7,8 +7,8 @@ import { socketEmitError } from "../socketEmitError.js";
 export const joinToGame = async ({ gameId, player, socket }) => {
   // console.log("joinToGame");
   try {
-    const game = await findGameOrFail(gameId, socket);
-    if (!game) throw new Error(`The game is ${game}`);
+    const { game, errorMessage } = await findGameByIdOrFail(gameId);
+    if (errorMessage) return socketEmitError({ errorMessage, socket });
 
     // Перевіряємо, чи гравець у грі
     const isPlayerInGame = game.players.some(

@@ -1,4 +1,4 @@
-import { findGameOrFail } from "../../services/gameServices.js";
+import { findGameByIdOrFail } from "../../services/gameServices.js";
 import { socketEmitError } from "../socketEmitError.js";
 
 export const setNextStoryteller = async ({ updatedGame, socket, io }) => {
@@ -6,8 +6,8 @@ export const setNextStoryteller = async ({ updatedGame, socket, io }) => {
 
   const event = "nextStorytellerUpdated";
   try {
-    const game = await findGameOrFail(updatedGame._id, socket);
-    if (!game) throw new Error(`The game is ${game}`);
+    const { game, errorMessage } = await findGameByIdOrFail(updatedGame._id);
+    if (errorMessage) return socketEmitError({ errorMessage, socket });
 
     game.set({ ...updatedGame });
     await game.save();

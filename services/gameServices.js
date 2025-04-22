@@ -16,22 +16,22 @@ import { User } from "../models/userModel.js";
 async function createNewGame(gameData) {
   console.log("createNewGame");
 
-  const user = await User.findOne({ _id: gameData.hostPlayerId });
+  const user = await User.findById(gameData.hostPlayerId);
+  if (!user)
+    return {
+      errorMessage: `User with hostPlayerId ${gameData.hostPlayerId} not found`,
+    };
 
   // Перевірка, чи у гравця вже є активна гра
-  const existingGame = await Game.findOne({
+  const activeGame = await Game.findOne({
     playerGameId: user.playerGameId,
   });
 
-  if (existingGame && existingGame.status !== FINISH) {
-    console.log("error --- existingGame");
+  if (activeGame && activeGame.status !== FINISH) {
     throw HttpError({
       status: 409,
       message: "You already have an active game. Finish or delete it first.",
     });
-    // return new Error(
-    //   "You already have an active game. Finish or delete it first.",
-    // );
   }
 
   const newGame = new Game(gameData);
@@ -40,7 +40,7 @@ async function createNewGame(gameData) {
   newGame.playerGameId = user.playerGameId;
   await newGame.save();
 
-  return newGame;
+  return { game: newGame };
 }
 
 // Пошук незавершеної гри
@@ -61,20 +61,20 @@ async function gameFindActiveCurrent(searchGameNumber) {
 }
 
 // Перевірка, чи гра існує
-async function findGameOrFail(gameId, socket) {
+async function findGameByIdOrFail(gameId) {
   const game = await Game.findById(gameId);
-  if (!game) {
-    socketEmitError({ socket });
-    return null;
-  }
+  if (!game)
+    return {
+      errorMessage: `Error: The game with id ${gameId} not found`,
+    };
 
-  // todo:
-  if (game.isGameFinished) {
-    socketEmitError({ errorMessage: "Game already finish", socket });
-    return null;
-  }
+  // todo: add isGameFinished
+  if (game.isGameFinished)
+    return {
+      errorMessage: `Game with id ${gameId} already finish`,
+    };
 
-  return game;
+  return { game };
 }
 
 // Перевірка, чи гра існує і її оновлення
@@ -145,7 +145,7 @@ async function findGameAndDeleteOrFail(gameId, socket, event) {
 export {
   createNewGame,
   gameFindActiveCurrent,
-  findGameOrFail,
+  findGameByIdOrFail,
   findGameAndUpdateOrFail,
   addPlayerToGame,
   joinSocketToRoom,

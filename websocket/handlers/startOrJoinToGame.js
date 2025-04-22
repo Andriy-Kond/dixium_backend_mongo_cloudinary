@@ -1,6 +1,6 @@
 import {
   addPlayerToGame,
-  findGameOrFail,
+  findGameByIdOrFail,
   joinSocketToRoom,
   notifyRoom,
 } from "../../services/gameServices.js";
@@ -10,8 +10,8 @@ export const startOrJoinToGame = async ({ gameId, player, socket, io }) => {
   console.log("startOrJoinToGame");
 
   try {
-    const game = await findGameOrFail(gameId, socket);
-    if (!game) throw new Error(`The game is ${game}`);
+    const { game, errorMessage } = await findGameByIdOrFail(gameId);
+    if (errorMessage) return socketEmitError({ errorMessage, socket });
 
     // If game not started only host can start it
     if (!game.isGameStarted) {
@@ -22,6 +22,7 @@ export const startOrJoinToGame = async ({ gameId, player, socket, io }) => {
           socket,
         });
       }
+
       game.isGameStarted = true;
     }
 
