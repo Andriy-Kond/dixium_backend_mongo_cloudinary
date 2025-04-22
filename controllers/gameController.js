@@ -16,9 +16,16 @@ const getAllGames = async (req, res) => {
 };
 
 const getCurrentGame = async (req, res) => {
-  console.log("getCurrentGame");
-  // console.log("req.params:::", req.params); // req.params::: { id: '3510' }
-  const game = await Game.findOne({ playerGameId: req.params.id });
+  console.log("get Current Game");
+  const game = await Game.findOne({ _id: req.params.id }); // find by game _id
+
+  res.json(game);
+};
+
+const findGame = async (req, res) => {
+  console.log("find Game by playerGameId");
+  // console.log("req.params:::", req.params); // req.params::: { playerGameId: '3510' }
+  const game = await Game.findOne({ playerGameId: req.params.playerGameId }); // find by playerGameId
 
   res.json(game);
 };
@@ -62,6 +69,7 @@ const removeGame = async (req, res) => {
 export const gameController = {
   getAllGames: tryCatchDecorator(getAllGames),
   getCurrentGame: tryCatchDecorator(getCurrentGame),
+  findGame: tryCatchDecorator(findGame),
   // createGame: tryCatchDecorator(createGame),
   removeGame: tryCatchDecorator(removeGame),
   updateGame: tryCatchDecorator(updateGame),

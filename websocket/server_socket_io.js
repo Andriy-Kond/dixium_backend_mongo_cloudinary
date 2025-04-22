@@ -7,7 +7,7 @@ import {
   deleteUserFromGame,
   gameCreate,
   gameDelete,
-  gameEntry,
+  startOrJoinToGame,
   gameRun,
   gameUpdateFirstTurn,
   joinToGame,
@@ -109,8 +109,8 @@ io.on("connection", socket => {
   const handleGameCreate = async ({ gameData }) =>
     gameCreate({ gameData, socket, io });
 
-  const handleGameEntry = async ({ gameId, player }) =>
-    gameEntry({ gameId, player, socket, io });
+  const handleStartOrJoinToGame = async ({ gameId, player }) =>
+    startOrJoinToGame({ gameId, player, socket, io });
 
   const handleDeleteUserFromGame = async ({ updatedGame }) => {
     deleteUserFromGame({ updatedGame, socket, io });
@@ -119,8 +119,8 @@ io.on("connection", socket => {
   const handleGameRun = async ({ updatedGame }) =>
     gameRun({ updatedGame, socket, io });
 
-  const handleGameDelete = async ({ gameId }) =>
-    gameDelete({ gameId, socket, io });
+  const handleGameDelete = async ({ gameId, userId }) =>
+    gameDelete({ gameId, userId, socket, io });
 
   const handleJoinToGame = async ({ gameId, player }) =>
     joinToGame({ gameId, player, socket });
@@ -165,7 +165,7 @@ io.on("connection", socket => {
 
   socket.on("gameUpdateFirstTurn", handleGameUpdateFirstTurn);
   socket.on("createGame", handleGameCreate);
-  socket.on("startOrJoinToGame", handleGameEntry);
+  socket.on("startOrJoinToGame", handleStartOrJoinToGame);
   socket.on("deleteUserFromGame", handleDeleteUserFromGame);
   socket.on("gameRun", handleGameRun);
   socket.on("deleteGame", handleGameDelete);

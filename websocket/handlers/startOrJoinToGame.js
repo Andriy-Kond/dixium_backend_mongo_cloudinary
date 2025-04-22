@@ -6,8 +6,8 @@ import {
 } from "../../services/gameServices.js";
 import { socketEmitError } from "../socketEmitError.js";
 
-export const gameEntry = async ({ gameId, player, socket, io }) => {
-  console.log("gameEntry");
+export const startOrJoinToGame = async ({ gameId, player, socket, io }) => {
+  console.log("startOrJoinToGame");
 
   try {
     const game = await findGameOrFail(gameId, socket);
@@ -37,7 +37,7 @@ export const gameEntry = async ({ gameId, player, socket, io }) => {
     joinSocketToRoom(socket, gameId, player);
 
     // Оновлюємо гру для всіх і сповіщаємо кімнату
-    io.emit("gameCreatedOrUpdated", { game, player });
+    io.emit("playerStartOrJoinToGame", { game, player });
 
     notifyRoom({
       io,

@@ -15,7 +15,7 @@ export const gameFindActive = async ({ searchGameNumber, socket, io }) => {
   } catch (err) {
     console.error("Error finding game:", err);
     socketEmitError({
-      errorMessage: "Server error: finding game error",
+      errorMessage: `Game with number ${searchGameNumber} not found.`,
       socket,
     });
   }
