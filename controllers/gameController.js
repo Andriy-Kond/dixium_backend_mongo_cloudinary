@@ -51,15 +51,15 @@ const findGame = async (req, res) => {
 //   res.status(200).json(newGame);
 // };
 
-const updateGame = async (req, res) => {
-  const game = await Game.findByIdAndUpdate(req.params.gameId, req.body, {
-    new: true,
-  });
-  // Відправляємо оновлення через сокети всім гравцям
-  req.io.emit("currentGame:update", game); // ??
+// const updateGame = async (req, res) => {
+//   const game = await Game.findByIdAndUpdate(req.params.gameId, req.body, {
+//     new: true,
+//   });
+//   // Відправляємо оновлення через сокети всім гравцям
+//   req.io.emit("currentGame:update", game); // ??
 
-  res.status(201).json(game); // send http response to current sender (needs for debugging)
-};
+//   res.status(201).json(game); // send http response to current sender (needs for debugging)
+// };
 
 const removeGame = async (req, res) => {
   const deletedGame = await Game.findByIdAndDelete(req.params.id);
@@ -72,5 +72,5 @@ export const gameController = {
   findGame: tryCatchDecorator(findGame),
   // createGame: tryCatchDecorator(createGame),
   removeGame: tryCatchDecorator(removeGame),
-  updateGame: tryCatchDecorator(updateGame),
+  // updateGame: tryCatchDecorator(updateGame),
 };

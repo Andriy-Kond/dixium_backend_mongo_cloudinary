@@ -18,8 +18,8 @@ const register = async (req, res) => {
   console.log("register >>>");
   //# Adding custom error message for 409 status when you validate uniq field (for example "email")
   const { email, password } = req.body;
-  const user = await User.findOne({ email }); // Find user with this email. If not found, returns "null"
-  if (user) {
+  const foundUser = await User.findOne({ email }); // Find user with this email. If not found, returns "null"
+  if (foundUser) {
     throw HttpError({
       status: 409,
       message: `Email ${email} already in our db`,
@@ -40,7 +40,10 @@ const register = async (req, res) => {
     ...req.body,
     password: hashedPassword,
     avatarURL: defaultAvatarURL,
-    playerGameId,
+    playerGameId, // type: Number()
+    googleId: "",
+    appleId: "",
+    userActiveGameId: "",
   });
 
   newUser.token = jwt.sign({ id: newUser._id }, SECRET_KEY, {
@@ -49,7 +52,15 @@ const register = async (req, res) => {
 
   await newUser.save();
 
-  res.status(201).json(newUser);
+  res.status(201).json({
+    _id: newUser._id,
+    name: newUser.name,
+    email: newUser.email,
+    token: newUser.token,
+    avatarURL: newUser.avatarURL,
+    playerGameId: newUser.playerGameId,
+    userActiveGameId: newUser.userActiveGameId,
+  });
 };
 
 const login = async (req, res) => {
@@ -74,10 +85,20 @@ const login = async (req, res) => {
 
   // Create and send token
   const jwtToken = jwt.sign({ id: user._id }, SECRET_KEY, { expiresIn: "23h" });
-  await User.findByIdAndUpdate(user._id, { token: jwtToken });
-  // user.token = jwtToken;
-  // await user.save();
-  res.json({ ...user._doc, token: jwtToken });
+  // await User.findByIdAndUpdate(user._id, { token: jwtToken }); // !!! Тут не працює, бо у res.json відправляються дані по старому токену!
+  user.token = jwtToken;
+  await user.save();
+
+  res.json({
+    _id: user._id,
+    name: user.name,
+    email: user.email,
+    token: user.token,
+    avatarURL: user.avatarURL,
+    playerGameId: user.playerGameId,
+    userActiveGameId: user.userActiveGameId,
+  });
+  // console.log(" login >> ...user._doc,:::", user._doc);
 };
 
 const googleLogin = async (req, res) => {
@@ -133,6 +154,7 @@ const googleLogin = async (req, res) => {
           playerGameId,
         });
       }
+
       await user.save();
     }
 
@@ -142,7 +164,15 @@ const googleLogin = async (req, res) => {
     user.token = jwtToken;
     await user.save();
 
-    res.json({ ...user._doc, token: jwtToken });
+    res.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      token: user.token,
+      avatarURL: user.avatarURL,
+      playerGameId: user.playerGameId,
+      userActiveGameId: user.userActiveGameId,
+    });
   } catch (error) {
     throw HttpError({ status: 401, message: "Invalid Google token" });
   }
@@ -150,9 +180,32 @@ const googleLogin = async (req, res) => {
 
 // Check whether token is still valid and send name&email
 const getCurrentUser = (req, res) => {
-  const { email, name, avatarURL } = req.user;
+  // console.log(" getCurrentUser >> req.user:::", req.user);
+  //   getCurrentUser >> req.user::: {
+  //   _id: new ObjectId('67fe6ea01bd21e525b20cd38'),
+  //   name: 'Andy',
+  //   email: 'akwebua.study@gmail.com',
+  //   token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3ZmU2ZWEwMWJkMjFlNTI1YjIwY2QzOCIsImlhdCI6MTc0NTQxMjIzOCwiZXhwIjoxNzQ1NDk1MDM4fQ.IHt5wEZD5wWrIH7leqAyX_2O3EUwlqFG9Et0y3CAV8I',
+  //   avatarURL: 'https://lh3.googleusercontent.com/a/ACg8ocIACoD4tEdhI_Qz577wYK2mCchqK5aa31q-kLGbdRhIEFanm3E=s96-c',
+  //   googleId: '113888083265055069149',
+  //   playerGameId: 2680,
+  //   createdAt: 2025-04-15T14:35:12.958Z,
+  //   updatedAt: 2025-04-23T12:43:58.222Z,
+  //   userActiveGameId: ''
+  // }
 
-  res.json({ email, name, avatarURL });
+  // Запит /api/auth/current — це GET-запит, який не містить тіла (req.body).
+  // Токен уже перевіряється в middleware authenticate. Якщо токен не валідний, запит не дійде до getCurrentUser.
+  // Повертати весь об'єкт req.user не можна, бо там є чутливі дані наприклад, хеш пароля.
+  res.json({
+    _id: req.user._id,
+    name: req.user.name,
+    email: req.user.email,
+    token: req.user.token,
+    avatarURL: req.user.avatarURL,
+    playerGameId: req.user.playerGameId,
+    userActiveGameId: req.user.userActiveGameId,
+  });
 };
 
 const logout = async (req, res) => {

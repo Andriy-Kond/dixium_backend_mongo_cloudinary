@@ -15,8 +15,8 @@ export const gameRun = async ({ updatedGame, socket, io }) => {
   }
 
   try {
-    const game = await findGameAndUpdateOrFail(updatedGame, socket, event);
-    if (!game) throw new Error(`The game is ${game}`);
+    const { game, errorMessage } = await findGameAndUpdateOrFail(updatedGame);
+    if (errorMessage) return socketEmitError({ errorMessage, socket });
 
     io.emit(event, { game }); // to all, for disable button "join to game"
   } catch (err) {

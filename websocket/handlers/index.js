@@ -1,4 +1,4 @@
-export * from "./joinToGame.js";
+export * from "./joinToGameRoom.js";
 export * from "./startOrJoinToGame.js";
 export * from "./gameCreate.js";
 export * from "./gameDelete.js";

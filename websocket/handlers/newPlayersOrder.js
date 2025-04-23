@@ -5,8 +5,8 @@ export const newPlayersOrder = async ({ updatedGame, socket, io }) => {
   console.log("newPlayersOrder");
   const event = "playersOrderUpdated";
   try {
-    const game = await findGameAndUpdateOrFail(updatedGame, socket, event);
-    if (!game) throw new Error(`The game is ${game}`);
+    const { game, errorMessage } = await findGameAndUpdateOrFail(updatedGame);
+    if (errorMessage) return socketEmitError({ errorMessage, socket });
 
     io.to(updatedGame._id).emit(event, { game });
   } catch (err) {
@@ -16,4 +16,4 @@ export const newPlayersOrder = async ({ updatedGame, socket, io }) => {
       socket,
     });
   }
-}; //* OK
+};

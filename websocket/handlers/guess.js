@@ -6,8 +6,8 @@ export const guess = async ({ updatedGame, socket, io }) => {
   const event = "playerGuessSuccess";
 
   try {
-    const game = await findGameAndUpdateOrFail(updatedGame, socket, event);
-    if (!game) throw new Error(`The game is ${game}`);
+    const { game, errorMessage } = await findGameAndUpdateOrFail(updatedGame);
+    if (errorMessage) return socketEmitError({ errorMessage, socket });
 
     io.to(updatedGame._id).emit(event, { game });
   } catch (err) {

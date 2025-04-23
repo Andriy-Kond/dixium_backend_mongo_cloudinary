@@ -1,10 +1,8 @@
-import {
-  findGameByIdOrFail,
-  joinSocketToRoom,
-} from "../../services/gameServices.js";
+import { findGameByIdOrFail } from "../../services/gameServices.js";
 import { socketEmitError } from "../socketEmitError.js";
 
-export const joinToGame = async ({ gameId, player, socket }) => {
+// Для init-connect/connect/reconnect при оновленні сторінки на клієнті
+export const joinToGameRoom = async ({ gameId, player, socket }) => {
   // console.log("joinToGame");
   try {
     const { game, errorMessage } = await findGameByIdOrFail(gameId);
@@ -23,7 +21,11 @@ export const joinToGame = async ({ gameId, player, socket }) => {
     }
 
     // Приєднуємо до кімнати
-    joinSocketToRoom(socket, gameId, player);
+    // joinSocketToRoom(socket, gameId, player);
+    socket.join(gameId);
+    console.log(
+      `Player ${player._id} (socket ${socket.id}) joined room ${gameId}`,
+    );
 
     // Повідомляємо клієнту, що він перепідключений
     // socket.emit("playerReJoined", {

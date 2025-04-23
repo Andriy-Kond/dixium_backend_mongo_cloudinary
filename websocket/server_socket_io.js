@@ -10,7 +10,7 @@ import {
   startOrJoinToGame,
   gameRun,
   gameUpdateFirstTurn,
-  joinToGame,
+  joinToGameRoom,
   newPlayersOrder,
   setFirstStoryteller,
   guess,
@@ -112,8 +112,8 @@ io.on("connection", socket => {
   const handleStartOrJoinToGame = async ({ gameId, player }) =>
     startOrJoinToGame({ gameId, player, socket, io });
 
-  const handleDeleteUserFromGame = async ({ updatedGame }) => {
-    deleteUserFromGame({ updatedGame, socket, io });
+  const handleDeleteUserFromGame = async ({ updatedGame, deletedUserId }) => {
+    deleteUserFromGame({ updatedGame, deletedUserId, socket, io });
   };
 
   const handleGameRun = async ({ updatedGame }) =>
@@ -122,8 +122,8 @@ io.on("connection", socket => {
   const handleGameDelete = async ({ gameId, userId }) =>
     gameDelete({ gameId, userId, socket, io });
 
-  const handleJoinToGame = async ({ gameId, player }) =>
-    joinToGame({ gameId, player, socket });
+  const handleJoinToGameRoom = async ({ gameId, player }) =>
+    joinToGameRoom({ gameId, player, socket });
 
   const handleNewPlayersOrder = async ({ updatedGame }) =>
     newPlayersOrder({ updatedGame, socket, io });
@@ -158,9 +158,9 @@ io.on("connection", socket => {
     startNewRound({ updatedGame, socket, io });
   };
 
-  const handleGameFindActive = async ({ searchGameNumber }) => {
+  const handleGameFindActive = async ({ searchGameNumber, initUserId }) => {
     console.log("handleFindGame");
-    gameFindActive({ searchGameNumber, socket, io });
+    gameFindActive({ searchGameNumber, initUserId, socket, io });
   };
 
   socket.on("gameUpdateFirstTurn", handleGameUpdateFirstTurn);
@@ -169,7 +169,7 @@ io.on("connection", socket => {
   socket.on("deleteUserFromGame", handleDeleteUserFromGame);
   socket.on("gameRun", handleGameRun);
   socket.on("deleteGame", handleGameDelete);
-  socket.on("joinGameRoom", handleJoinToGame);
+  socket.on("joinToGameRoom", handleJoinToGameRoom);
   socket.on("newPlayersOrder", handleNewPlayersOrder);
 
   socket.on("setFirstStoryteller", handleSetFirstStoryteller);

@@ -43,23 +43,6 @@ async function createNewGame(gameData) {
   return { game: newGame };
 }
 
-// Пошук незавершеної гри
-async function gameFindActiveCurrent(searchGameNumber) {
-  const game = await Game.findOne({
-    playerGameId: Number(searchGameNumber),
-    gameStatus: { $in: [LOBBY, GUESSING, VOTING, ROUND_RESULTS] }, // Шукаю лише активні ігри
-  });
-
-  if (!game) {
-    throw HttpError({
-      status: 404,
-      message: `Game with number ${searchGameNumber} not found or already finished`,
-    });
-  }
-
-  return game;
-}
-
 // Перевірка, чи гра існує
 async function findGameByIdOrFail(gameId) {
   const game = await Game.findById(gameId);
@@ -78,18 +61,20 @@ async function findGameByIdOrFail(gameId) {
 }
 
 // Перевірка, чи гра існує і її оновлення
-async function findGameAndUpdateOrFail(currentGame, socket, event) {
+async function findGameAndUpdateOrFail(updatedGame) {
   console.log("findGameAndUpdateOrFail");
 
-  const game = await Game.findByIdAndUpdate(currentGame._id, currentGame, {
+  const game = await Game.findByIdAndUpdate(updatedGame._id, updatedGame, {
     new: true,
   });
 
-  if (!game) {
-    // special event for return previous state in event handler on client:
-    socketEmitError({ event, socket });
-    return null;
-  }
+  if (!game)
+    return {
+      errorMessage: `Cannot update game with updatedGame._id ${updatedGame._id}`,
+      // special event for return previous state in event handler on client:
+      // socketEmitError({ event, socket });
+      // return null;
+    };
 
   // if (!game) {
   //   // emit "playersOrderUpdated" - for return previous state:
@@ -99,56 +84,9 @@ async function findGameAndUpdateOrFail(currentGame, socket, event) {
   //   });
   //   return null;
   // }
+  console.log(" findGameAndUpdateOrFail >> playersOrderUpdated:::");
 
-  return game;
+  return { game };
 }
 
-// Додавання гравця до гри
-async function addPlayerToGame(game, player, isPlayerInGame) {
-  if (!isPlayerInGame) {
-    // player.hand = []; // Встановлюється у GameList на клієнті
-    game.players.push(player);
-  }
-
-  return game; // ?? нащо?
-}
-
-// Приєднання сокета до кімнати
-function joinSocketToRoom(socket, gameId, player) {
-  socket.join(gameId);
-  console.log(
-    `Player ${player._id} (socket ${socket.id}) joined room ${gameId}`,
-  );
-}
-
-// Сповіщення всіх у кімнаті
-function notifyRoom({ io, gameId, game, player, isPlayerInGame, message }) {
-  io.to(gameId).emit("playerJoined", {
-    game,
-    player,
-    ...(!isPlayerInGame && { message }), // send message only if it first join player to game
-  });
-}
-
-// Видалення гри
-async function findGameAndDeleteOrFail(gameId, socket, event) {
-  const game = await Game.findByIdAndDelete(gameId);
-
-  if (!game) {
-    socketEmitError({ event, socket });
-    return null;
-  }
-
-  return game;
-}
-
-export {
-  createNewGame,
-  gameFindActiveCurrent,
-  findGameByIdOrFail,
-  findGameAndUpdateOrFail,
-  addPlayerToGame,
-  joinSocketToRoom,
-  notifyRoom,
-  findGameAndDeleteOrFail,
-};
+export { createNewGame, findGameByIdOrFail, findGameAndUpdateOrFail };

@@ -7,8 +7,8 @@ export const gameUpdateFirstTurn = async ({ updatedGame, socket }) => {
 
   const event = "gameFirstTurnUpdated";
   try {
-    const game = await findGameAndUpdateOrFail(updatedGame, socket, event);
-    if (!game) throw new Error(`The game is ${game}`);
+    const { game, errorMessage } = await findGameAndUpdateOrFail(updatedGame);
+    if (errorMessage) return socketEmitError({ errorMessage, socket });
 
     socket.emit(event, { game });
   } catch (err) {

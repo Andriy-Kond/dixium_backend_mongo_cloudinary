@@ -64,7 +64,7 @@ const mongooseUserSchema = new Schema(
     },
     appleId: { type: String, unique: true, sparse: true },
     playerGameId: { type: Number, unique: true },
-    userActiveGameId: { type: String },
+    userActiveGameId: { type: String, sparse: true },
   },
   { versionKey: false, timestamps: true },
 );

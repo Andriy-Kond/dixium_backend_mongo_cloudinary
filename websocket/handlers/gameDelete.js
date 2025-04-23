@@ -1,21 +1,45 @@
+import { Game } from "../../models/gameModel.js";
 import { User } from "../../models/userModel.js";
-import { findGameAndDeleteOrFail } from "../../services/gameServices.js";
 import { socketEmitError } from "../socketEmitError.js";
 
 export const gameDelete = async ({ gameId, userId, socket, io }) => {
   console.log("gameDelete");
-  const event = "gameWasDeleted";
+
   try {
-    const game = await findGameAndDeleteOrFail(gameId, socket, event);
+    const game = await Game.findByIdAndDelete(gameId);
+    if (!game)
+      return socketEmitError({
+        errorMessage: `Game with gameId ${gameId} not found`,
+        socket,
+      });
 
-    if (!game) throw new Error(`The game is ${game}`);
+    // const user = await User.findById(userId);
+    // if (!user)
+    //   return socketEmitError({
+    //     errorMessage: `User with userId ${userId} not found`,
+    //     socket,
+    //   });
 
-    const user = await User.findById(userId);
-    user.userActiveGameId = "";
-    await user.save();
+    // user.userActiveGameId = "";
+    // await user.save();
 
-    io.emit(event, { game });
-    socket.emit("updateUserCredentials", { user });
+    const playerIds = game.players.map(p => p._id);
+    await User.updateMany(
+      { _id: { $in: playerIds } },
+      { userActiveGameId: "" },
+    );
+
+    // delete game for all (if they found it right now for example)
+    io.emit("gameDeleted", { game }); // send update to all users
+
+    // Clear userActiveGameId for all in room
+    // io.to(gameId).emit("updateUserCredentials", { user });
+
+    const user = { userActiveGameId: "" };
+    io.to(gameId).emit("updateUserCredentials", { user });
+    console.log(" gameDelete >> user:::", user);
+
+    // io.to(updatedGame._id).emit("userDeletedFromGame", { game, deletedUser });
   } catch (err) {
     console.log("Server error: Cannot delete game", err);
     socketEmitError({
