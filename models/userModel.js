@@ -19,8 +19,8 @@ const emailValidator = {
 };
 
 const passwordValidator = {
-  validator: value => isLength(value, { min: 3, max: 150 }),
-  message: "Password must be 3-150 characters long",
+  validator: value => isLength(value, { min: 3, max: 100 }),
+  message: "Password must be 3-100 characters long",
 };
 
 //^ Mongoose-schema - validate data before for save it in db
@@ -40,9 +40,10 @@ const mongooseUserSchema = new Schema(
 
       //* Unique check
       // For unique error must be status 409 and should be other error message
-      // unique: true, ["This error already in db"] //~ in this case error.code always will be 400, not 409! So, you should change in in  errors handling middleware (handleMongooseError)
+      // unique: true, ["This error already in db"] //~ in this case error.code always will be 400, not 409! So, you should change it in errors handling middleware (handleMongooseError)
       unique: true, //~ You can add custom error massage in handleMongooseError. But this middleware universal for all mongoose models. So you should change message in authController.js
-      // or "validate" if more complex expression needed:
+
+      // // or "validate" if more complex expression needed:
       // validate: emailValidator,
 
       // email must be uniq item in db. Cannot be two users with the same email.
@@ -53,6 +54,7 @@ const mongooseUserSchema = new Schema(
       type: String,
       // Пароль не обов’язковий для Google-авторизації, тому його треба прибрати
       // required: [true, "Password is required"],
+      required: false, // Дозволяє null/undefined для користувачів Google
       validate: passwordValidator,
     },
     token: { type: String, default: "" },
@@ -65,6 +67,8 @@ const mongooseUserSchema = new Schema(
     appleId: { type: String, unique: true, sparse: true },
     playerGameId: { type: Number, unique: true },
     userActiveGameId: { type: String, sparse: true },
+
+    refreshToken: { type: String, default: null },
   },
   { versionKey: false, timestamps: true },
 );
@@ -88,7 +92,12 @@ const loginUser = Joi.object({
   password: Joi.string().required(),
 });
 
+const setPassword = Joi.object({
+  password: Joi.string().min(3).max(150).required(),
+});
+
 export const joiUserSchemas = {
   registerUser,
   loginUser,
+  setPassword,
 };

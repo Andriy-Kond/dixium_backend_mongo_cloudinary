@@ -24,6 +24,7 @@ app.use("/", (req, res, next) => {
 
 // Route for errors (4 parameters)
 app.use((err, req, res, next) => {
+  console.error("Помилка:", err); // Логування помилки для дебагінгу
   const { status = 500, message = "Server error" } = err;
   return res.status(status).json({ message });
 });

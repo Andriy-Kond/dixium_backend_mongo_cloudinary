@@ -18,11 +18,19 @@ const register = async (req, res) => {
   console.log("register >>>");
   //# Adding custom error message for 409 status when you validate uniq field (for example "email")
   const { email, password } = req.body;
+
   const foundUser = await User.findOne({ email }); // Find user with this email. If not found, returns "null"
   if (foundUser) {
+    if (foundUser.googleId && !foundUser.password) {
+      throw HttpError({
+        status: 409,
+        message: `This email is registered via Google. Sign in via Google or set a password to enable email/password sign-in.`,
+      });
+    }
+
     throw HttpError({
       status: 409,
-      message: `Email ${email} already in our db`,
+      message: `Email ${email} вже є у базі`,
     });
   }
 
@@ -46,11 +54,47 @@ const register = async (req, res) => {
     userActiveGameId: "",
   });
 
-  newUser.token = jwt.sign({ id: newUser._id }, SECRET_KEY, {
+  // Create and send token
+  const jwtToken = jwt.sign({ id: newUser._id }, SECRET_KEY, {
     expiresIn: "23h",
   });
 
+  newUser.token = jwtToken;
   await newUser.save();
+
+  // Метод res.cookie встановлює cookie у відповіді HTTP.
+  // "token": Ім’я cookie, яке буде збережено в браузері.
+  // jwtToken: Значення cookie, у цьому випадку JWT-токен.
+  res.cookie("token", jwtToken, {
+    httpOnly: true, // Робить cookie недоступним для JavaScript (наприклад, через document.cookie). Захищає від XSS-атак, оскільки зловмисний скрипт не може вкрасти токен.
+    secure: process.env.NODE_ENV === "production", // Використовувати secure у продакшені. Якщо true, cookie надсилається лише через HTTPS
+    // secure: true,
+    sameSite: "strict", // Контролює, коли cookie надсилається в запитах:
+    // "strict" - Cookie надсилається лише в запитах із того ж сайту (наприклад, якщо користувач переходить за посиланням із вашого домену).
+    // Це захищає від CSRF-атак, оскільки cookie не надсилається в запитах із зовнішніх сайтів.
+    // "lax" - дозволяє деякі крос-сайтові запити, наприклад, GET-посилання
+    // "none" - дозволяє всі крос-сайтові запити, але вимагає secure: true.
+    maxAge: 23 * 60 * 60 * 1000, // 23 години. Після закінчення цього часу браузер автоматично видаляє cookie
+  });
+
+  // const refreshToken = jwt.sign({ id: user._id }, process.env.REFRESH_SECRET, {
+  //   expiresIn: "7d",
+  // });
+
+  // await User.findByIdAndUpdate(user._id, { token: jwtToken, refreshToken });
+
+  // res.cookie("token", jwtToken, {
+  //   httpOnly: true,
+  //   secure: true,
+  //   sameSite: "strict",
+  // });
+
+  // res.cookie("refreshToken", refreshToken, {
+  //   httpOnly: true,
+  //   secure: true,
+  //   sameSite: "strict",
+  //   maxAge: 7 * 24 * 60 * 60 * 1000,
+  // });
 
   res.status(201).json({
     _id: newUser._id,
@@ -63,6 +107,48 @@ const register = async (req, res) => {
   });
 };
 
+// const refreshToken = async (req, res) => {
+//   const { refreshToken } = req.cookies;
+//   if (!refreshToken) {
+//     throw HttpError({ status: 401, message: "Немає refresh-токена" });
+//   }
+
+//   const user = await User.findOne({ refreshToken });
+//   if (!user) {
+//     throw HttpError({ status: 401, message: "Недійсний refresh-токен" });
+//   }
+
+//   const newJwtToken = jwt.sign({ id: user._id }, SECRET_KEY, {
+//     expiresIn: "23h",
+//   });
+//   const newRefreshToken = jwt.sign(
+//     { id: user._id },
+//     process.env.REFRESH_SECRET,
+//     {
+//       expiresIn: "7d",
+//     },
+//   );
+
+//   await User.findByIdAndUpdate(user._id, {
+//     token: newJwtToken,
+//     refreshToken: newRefreshToken,
+//   });
+
+//   res.cookie("token", newJwtToken, {
+//     httpOnly: true,
+//     secure: true,
+//     sameSite: "strict",
+//   });
+//   res.cookie("refreshToken", newRefreshToken, {
+//     httpOnly: true,
+//     secure: true,
+//     sameSite: "strict",
+//     maxAge: 7 * 24 * 60 * 60 * 1000,
+//   });
+
+//   res.json({ message: "Токен оновлено" });
+// };
+
 const login = async (req, res) => {
   console.log("login");
   const { email, password } = req.body;
@@ -71,15 +157,23 @@ const login = async (req, res) => {
   if (!user) {
     throw HttpError({
       status: 401,
-      message: `Email or password invalid`,
+      message: `Email or password invalid - user not found`,
     });
   }
 
-  const comparePass = bcrypt.compare(password, user.password);
+  // Перевірка, чи є пароль у користувача (тобто чи це лише Google-користувач чи ні)
+  if (!user.password) {
+    throw HttpError({
+      status: 401,
+      message: `This account is registered via Google. Please use Google sign-in or set a password.`,
+    });
+  }
+
+  const comparePass = await bcrypt.compare(password, user.password); // it is async operation
   if (!comparePass) {
     throw HttpError({
       status: 401,
-      message: `Email or password invalid`,
+      message: `Email or password invalid. Try again.`,
     });
   }
 
@@ -88,6 +182,14 @@ const login = async (req, res) => {
   // await User.findByIdAndUpdate(user._id, { token: jwtToken }); // !!! Тут не працює, бо у res.json відправляються дані по старому токену!
   user.token = jwtToken;
   await user.save();
+
+  res.cookie("token", jwtToken, {
+    httpOnly: true,
+    // secure: process.env.NODE_ENV === "production", // Використовувати secure у продакшені
+    secure: true,
+    sameSite: "strict",
+    maxAge: 23 * 60 * 60 * 1000, // 23 години
+  });
 
   res.json({
     _id: user._id,
@@ -98,7 +200,23 @@ const login = async (req, res) => {
     playerGameId: user.playerGameId,
     userActiveGameId: user.userActiveGameId,
   });
+
   // console.log(" login >> ...user._doc,:::", user._doc);
+};
+
+// Дозволити авторизованим користувачам Google встановлювати пароль.
+// Вимога - щоб користувач був авторизований (через Google) і вказав новий пароль.
+const setPassword = async (req, res) => {
+  const { password } = req.body;
+  const { _id } = req.user; // req.user додається у middleware authenticate.js
+
+  if (!password)
+    throw HttpError({ status: 400, message: "Password is required!" });
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+  await User.findByIdAndUpdate(_id, { password: hashedPassword });
+
+  res.json({ message: "Setup password success!" });
 };
 
 const googleLogin = async (req, res) => {
@@ -139,8 +257,9 @@ const googleLogin = async (req, res) => {
     if (!user) {
       user = await User.findOne({ email });
       if (user) {
-        // Пов'язую Google ID із наявним користувачем
+        // Прив’язка Google ID до існуючого користувача email/пароль
         user.googleId = googleId;
+        user.avatarURL = user.avatarURL || picture; // Оновлення аватара, якщо не встановлено
       } else {
         // Унікальний номер:
         const playerGameId = await generateUniquePlayerGameId();
@@ -163,6 +282,14 @@ const googleLogin = async (req, res) => {
     });
     user.token = jwtToken;
     await user.save();
+
+    res.cookie("token", jwtToken, {
+      httpOnly: true,
+      // secure: process.env.NODE_ENV === "production", // Використовувати secure у продакшені
+      secure: true,
+      sameSite: "strict",
+      maxAge: 23 * 60 * 60 * 1000, // 23 години
+    });
 
     res.json({
       _id: user._id,
@@ -247,4 +374,5 @@ export const authController = {
   getCurrentUser: tryCatchDecorator(getCurrentUser),
   logout: tryCatchDecorator(logout),
   changeAvatar: tryCatchDecorator(changeAvatar),
+  setPassword: tryCatchDecorator(setPassword),
 };

@@ -4,14 +4,16 @@ import { joiUserSchemas } from "../../models/userModel.js";
 import { authController } from "../../controllers/authController.js";
 import { authenticate } from "../../middlewares/authenticate.js";
 import { upload } from "../../middlewares/upload.js";
+import { authRateLimiter } from "../../middlewares/rateLimit.js";
 
 export const authRouter = express.Router();
 
 // * local middlewares "checkErrorJoiSchemaDecorator" checks by model for each request where you receive data:
-
+// Застосування обмежувача authRateLimiter до маршрутів авторизації
 // signup
 authRouter.post(
   "/register",
+  authRateLimiter,
   checkErrorJoiSchemaDecorator(joiUserSchemas.registerUser), // check by User model
   authController.register, // register new user
 );
@@ -19,18 +21,27 @@ authRouter.post(
 // login
 authRouter.post(
   "/login",
+  authRateLimiter,
   checkErrorJoiSchemaDecorator(joiUserSchemas.loginUser), // check by User model
   authController.login, // register new user
 );
 
 // login by google
-authRouter.post("/google", authController.googleLogin);
+authRouter.post("/google", authRateLimiter, authController.googleLogin);
 
-// take token from .../current
+// take token from .../current Отримання поточного користувача
 authRouter.get(
   "/current",
   authenticate, // checks whether token is correct
   authController.getCurrentUser, // check whether token is still valid
+);
+
+// Встановлювання паролю для авторизованих користувачів Google
+authRouter.post(
+  "/set-password",
+  authenticate,
+  checkErrorJoiSchemaDecorator(joiUserSchemas.setPassword),
+  authController.setPassword,
 );
 
 // logout
@@ -47,3 +58,5 @@ authRouter.patch(
   upload.single("avatarFile"),
   authController.changeAvatar,
 );
+
+// authRouter.post("/refresh-token", authController.refreshToken);
