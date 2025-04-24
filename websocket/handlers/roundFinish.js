@@ -1,3 +1,4 @@
+import { User } from "../../models/userModel.js";
 import { findGameAndUpdateOrFail } from "../../services/gameServices.js";
 import { FINISH } from "../../utils/generals/constants.js";
 import { socketEmitError } from "../socketEmitError.js";
@@ -32,9 +33,8 @@ export const roundFinish = async ({ updatedGame, socket, io }) => {
       );
 
       io.to(updatedGame._id).emit("gameEnd", { game });
-      io.to(updatedGame._id).emit("updateUserCredentials", {
-        user: { userActiveGameId: "" },
-      });
+      const user = { userActiveGameId: "" };
+      io.to(updatedGame._id).emit("updateUserCredentials", { user });
     }
   } catch (err) {
     console.error("Error in handling current game run:", err);

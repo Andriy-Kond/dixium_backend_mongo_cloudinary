@@ -24,15 +24,15 @@ export const gameFindActive = async ({
     });
 
     if (!game) {
-      socketEmitError({
+      return socketEmitError({
         errorMessage: `A game with number ${searchGameNumber} not found or already finished`,
         socket,
       });
 
-      throw HttpError({
-        status: 404,
-        message: `Game with number ${searchGameNumber} not found or already finished`,
-      });
+      // throw HttpError({
+      //   status: 404,
+      //   message: `Game with number ${searchGameNumber} not found or already finished`,
+      // });
     }
 
     // // update field userActiveGameId
