@@ -50,6 +50,17 @@ const mongooseUserSchema = new Schema(
       // unique: [true, "This email already in db"], // make field "email" unique within this collection
       // "message": "E11000 duplicate key error collection: phone_book_db.users index: email_1 dup key: { email: \"andrii@vestibul.co.uk\" }"
     },
+
+    isEmailVerified: {
+      type: Boolean,
+      default: false,
+    },
+    emailVerificationDeadline: { type: Date }, // Дедлайн для верифікації email
+    verificationToken: {
+      type: String,
+      default: null,
+    },
+
     password: {
       type: String,
       // Пароль не обов’язковий для Google-авторизації, тому його треба прибрати
@@ -96,8 +107,11 @@ const setPassword = Joi.object({
   password: Joi.string().min(3).max(150).required(),
 });
 
+const resendVerification = Joi.object({});
+
 export const joiUserSchemas = {
   registerUser,
   loginUser,
   setPassword,
+  resendVerification,
 };

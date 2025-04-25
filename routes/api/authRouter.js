@@ -18,6 +18,15 @@ authRouter.post(
   authController.register, // register new user
 );
 
+authRouter.get("/verify-email/:verificationToken", authController.verifyEmail);
+
+authRouter.post(
+  "/resend-verification",
+  authenticate,
+  checkErrorJoiSchemaDecorator(joiUserSchemas.resendVerification),
+  authController.resendVerificationEmail,
+);
+
 // login
 authRouter.post(
   "/login",

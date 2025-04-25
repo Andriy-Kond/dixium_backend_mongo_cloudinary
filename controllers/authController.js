@@ -4,12 +4,14 @@ import path from "path";
 import fs from "fs/promises";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { nanoid } from "nanoid";
 
 import { User } from "../models/userModel.js";
 import { HttpError } from "../utils/HttpError.js";
 import { tryCatchDecorator } from "../utils/tryCatchDecorator.js";
 import { OAuth2Client } from "google-auth-library";
 import { generateUniquePlayerGameId } from "../utils/generateUniquePlayerGameId.js";
+import { sendVerificationEmail } from "../utils/sendVerificationEmail.js";
 
 const { SECRET_KEY = "", GOOGLE_CLIENT_ID = "" } = process.env;
 const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
@@ -19,19 +21,26 @@ const register = async (req, res) => {
   //# Adding custom error message for 409 status when you validate uniq field (for example "email")
   const { email, password } = req.body;
 
-  const foundUser = await User.findOne({ email }); // Find user with this email. If not found, returns "null"
+  const foundUser = await User.findOne({ email }); // If not found, returns "null"
   if (foundUser) {
     if (foundUser.googleId && !foundUser.password) {
       throw HttpError({
         status: 409,
-        message: `This email is registered via Google. Sign in via Google or set a password to enable email/password sign-in.`,
+        message: `This email is registered via Google. Sign in via Google or set a password to enable sign-in with email&password.`,
       });
     }
 
-    throw HttpError({
-      status: 409,
-      message: `Email ${email} вже є у базі`,
-    });
+    if (foundUser.isEmailVerified) {
+      throw HttpError({
+        status: 409,
+        message: `Email already exists and confirmed`,
+      });
+    } else {
+      throw HttpError({
+        status: 409,
+        message: `Email already registered but not verified. Please verify your email.`,
+      });
+    }
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -43,6 +52,8 @@ const register = async (req, res) => {
 
   // Унікальний номер
   const playerGameId = await generateUniquePlayerGameId();
+  const verificationToken = nanoid();
+  const emailVerificationDeadline = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 години
 
   const newUser = await User.create({
     ...req.body,
@@ -52,13 +63,18 @@ const register = async (req, res) => {
     googleId: "",
     appleId: "",
     userActiveGameId: "",
+    verificationToken,
+    emailVerificationDeadline,
   });
+
+  // Надіслати верифікаційний лист
+  // await sendVerificationEmail(email, verificationToken);
+  await sendVerificationEmail({ to: email, verificationToken });
 
   // Create and send token
   const jwtToken = jwt.sign({ id: newUser._id }, SECRET_KEY, {
     expiresIn: "23h",
   });
-
   newUser.token = jwtToken;
   await newUser.save();
 
@@ -101,10 +117,61 @@ const register = async (req, res) => {
     name: newUser.name,
     email: newUser.email,
     token: newUser.token,
-    avatarURL: newUser.avatarURL,
+    avatarURL: newUser.avatarURL, // todo видалити звідси, а також з login, googleLogin, etc.
     playerGameId: newUser.playerGameId,
     userActiveGameId: newUser.userActiveGameId,
   });
+};
+
+const verifyEmail = async (req, res) => {
+  // якщо у sendVerificationEmail використовувати
+  // verificationLink = `${process.env.FRONTEND_URL}/api/auth/verify-email?token=${verificationToken}`:
+  // const { token } = req.query;
+  // const user = await User.findOne({ verificationToken: token });
+
+  // якщо у sendVerificationEmail використовувати
+  // verificationLink = `${process.env.FRONTEND_URL}/api/auth/verify-email/${verificationToken}`:
+  const { verificationToken } = req.params;
+  const user = await User.findOne({ verificationToken });
+
+  if (!user) {
+    throw HttpError({
+      status: 404,
+      message: "Invalid or expired verification token", // "Недійсний або прострочений верифікаційний токен"
+    });
+  }
+
+  await User.findByIdAndUpdate(user._id, {
+    isEmailVerified: true,
+    verificationToken: null,
+    emailVerificationDeadline: null,
+  });
+
+  // res.json({ message: "Email verified successfully" }); // "Email успішно верифіковано"
+  res.redirect(`${process.env.FRONTEND_URL}/login?verified=true`); // перенаправить користувача на цю адресу після успішної верифікації
+};
+
+const resendVerificationEmail = async (req, res) => {
+  const { _id, email, isEmailVerified } = req.user;
+
+  if (isEmailVerified) {
+    throw HttpError({ status: 400, message: "Email already verified" });
+  }
+
+  const verificationToken = nanoid();
+  const emailVerificationDeadline = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+  await User.findByIdAndUpdate(_id, {
+    verificationToken,
+    emailVerificationDeadline,
+  });
+
+  await sendVerificationEmail({
+    to: email,
+    verificationToken,
+  });
+
+  res.json({ message: "Verification email sent successfully" });
 };
 
 // const refreshToken = async (req, res) => {
@@ -157,7 +224,14 @@ const login = async (req, res) => {
   if (!user) {
     throw HttpError({
       status: 401,
-      message: `Email or password invalid - user not found`,
+      message: `User not found. The email or password is wrong or not registered.`,
+    });
+  }
+
+  if (!user.isEmailVerified && new Date() > user.emailVerificationDeadline) {
+    throw HttpError({
+      status: 403,
+      message: "Email not verified. Please verify your email.",
     });
   }
 
@@ -171,10 +245,7 @@ const login = async (req, res) => {
 
   const comparePass = await bcrypt.compare(password, user.password); // it is async operation
   if (!comparePass) {
-    throw HttpError({
-      status: 401,
-      message: `Email or password invalid. Try again.`,
-    });
+    throw HttpError({ status: 401, message: `Email or password is wrong.` });
   }
 
   // Create and send token
@@ -195,7 +266,7 @@ const login = async (req, res) => {
     _id: user._id,
     name: user.name,
     email: user.email,
-    token: user.token,
+    token: user.token, // todo прибрати
     avatarURL: user.avatarURL,
     playerGameId: user.playerGameId,
     userActiveGameId: user.userActiveGameId,
@@ -295,7 +366,7 @@ const googleLogin = async (req, res) => {
       _id: user._id,
       name: user.name,
       email: user.email,
-      token: user.token,
+      token: user.token, // todo прибрати
       avatarURL: user.avatarURL,
       playerGameId: user.playerGameId,
       userActiveGameId: user.userActiveGameId,
@@ -369,10 +440,12 @@ const changeAvatar = async (req, res) => {
 
 export const authController = {
   register: tryCatchDecorator(register),
+  verifyEmail: tryCatchDecorator(verifyEmail),
   login: tryCatchDecorator(login),
   googleLogin: tryCatchDecorator(googleLogin),
   getCurrentUser: tryCatchDecorator(getCurrentUser),
   logout: tryCatchDecorator(logout),
   changeAvatar: tryCatchDecorator(changeAvatar),
   setPassword: tryCatchDecorator(setPassword),
+  resendVerificationEmail: tryCatchDecorator(resendVerificationEmail),
 };

@@ -16,7 +16,7 @@ export const authenticate = async (req, res, next) => {
     next(
       HttpError({
         status: 401,
-        message: "Unauthorized - no 'Bearer' - invalid or missing Bearer token",
+        message: "Unauthorized - invalid or missing Bearer token (no 'Bearer')",
       }),
     );
   }
@@ -30,15 +30,27 @@ export const authenticate = async (req, res, next) => {
 
     // Чи існує користувач || чи є в нього токен || чи токен ще дійсний
     if (!user)
-      next(HttpError({ status: 401, message: "Unauthorized. User not found" }));
+      next(
+        HttpError({ status: 401, message: "Unauthorized. User not found." }),
+      );
 
     if (!user.token || user.token !== token)
       next(
         HttpError({
           status: 401,
-          message: "Unauthorized. Token missing or canceled",
+          message: "Unauthorized. Token invalid or revoked.",
         }),
       );
+
+    if (!user.isEmailVerified && user.emailVerificationDeadline < new Date()) {
+      // Блокує доступ до всіх захищених ендпоінтів (наприклад, /game, /set-password).
+      next(
+        HttpError({
+          status: 403,
+          message: "Email not verified. Please verify your email.",
+        }),
+      );
+    }
 
     // Object "req" is one for one request. For example for request contactsRouter.post("/", authenticate, checkErrorJoiSchemaDecorator(joiContactSchemas.addContact), contactsController.addContact) it will be the same in authenticate, checkErrorJoiSchemaDecorator and contactsController.
     req.user = user; // For adding identification of this user in contactController.addContact() or other places
