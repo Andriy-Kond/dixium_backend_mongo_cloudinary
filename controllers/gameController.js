@@ -19,6 +19,7 @@ const getCurrentGame = async (req, res) => {
   console.log("get Current Game");
   const game = await Game.findOne({ _id: req.params.id }); // find by game _id
 
+  console.log(" getCurrentGame >> game:::", game);
   res.json(game);
 };
 

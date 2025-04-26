@@ -2,13 +2,6 @@ import nodemailer from "nodemailer";
 
 const { EMAIL_HOST, EMAIL_USER, EMAIL_PASS, FRONTEND_URL } = process.env;
 
-console.log({
-  EMAIL_HOST,
-  EMAIL_USER,
-  EMAIL_PASS,
-  FRONTEND_URL,
-});
-
 const transporter = nodemailer.createTransport({
   host: EMAIL_HOST,
   port: 587,

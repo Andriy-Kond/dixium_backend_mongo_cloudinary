@@ -7,9 +7,8 @@ import { handleMongooseError } from "../utils/handleMongooseError.js";
 
 const { isLength } = validator;
 
-const emailRegExp = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}(\.[a-zA-Z]{2,})*$/;
-
 // /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/
+const emailRegExp = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}(\.[a-zA-Z]{2,})*$/;
 const emailValidator = {
   validator: value => {
     return emailRegExp.test(value);
@@ -43,8 +42,8 @@ const mongooseUserSchema = new Schema(
       // unique: true, ["This error already in db"] //~ in this case error.code always will be 400, not 409! So, you should change it in errors handling middleware (handleMongooseError)
       unique: true, //~ You can add custom error massage in handleMongooseError. But this middleware universal for all mongoose models. So you should change message in authController.js
 
-      // // or "validate" if more complex expression needed:
-      // validate: emailValidator,
+      // or "validate" if more complex expression needed:
+      validate: emailValidator,
 
       // email must be uniq item in db. Cannot be two users with the same email.
       // unique: [true, "This email already in db"], // make field "email" unique within this collection
@@ -67,11 +66,11 @@ const mongooseUserSchema = new Schema(
     googleId: {
       type: String,
       unique: true,
-      sparse: true, // Дозволяє null для не-Google користувачів (щоб уникнути конфліктів унікальності для користувачів без цих полів)
+      // sparse: true, // Дозволяє значення null для не-Google користувачів (щоб уникнути конфліктів унікальності для користувачів без цих полів) - // !НЕ ПРАЦЮЄ
     },
-    appleId: { type: String, unique: true, sparse: true },
+    appleId: { type: String, unique: true },
     playerGameId: { type: Number, unique: true },
-    userActiveGameId: { type: String, sparse: true },
+    userActiveGameId: { type: String, unique: true },
 
     refreshToken: { type: String, default: null },
     resetToken: { type: String, default: null },
@@ -88,8 +87,11 @@ export const User = model("user", mongooseUserSchema);
 //^ Joi-schemas - validates data coming from the frontend
 const registerUser = Joi.object({
   name: Joi.string().alphanum().min(3).max(30).required(),
-  // email: Joi.string().pattern(emailRegExp).required(),
-  email: Joi.string().required(),
+  email: Joi.string().pattern(emailRegExp).required().messages({
+    "string.pattern.base":
+      "Invalid email format. Please provide a valid email address.",
+  }),
+  // email: Joi.string().required(),
   password: Joi.string().required(),
 });
 

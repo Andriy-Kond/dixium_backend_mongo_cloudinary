@@ -54,22 +54,21 @@ const register = async (req, res) => {
   // Унікальний номер
   const playerGameId = await generateUniquePlayerGameId();
   const verificationToken = nanoid();
-  const emailVerificationDeadline = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 години
+  const emailVerificationDeadline = new Date(Date.now() + 168 * 60 * 60 * 1000); // 24 години (168 годин)
 
   const newUser = await User.create({
     ...req.body,
     password: hashedPassword,
     avatarURL: defaultAvatarURL,
     playerGameId, // type: Number()
-    googleId: "",
-    appleId: "",
+    // googleId: null,
+    // appleId: null,
     userActiveGameId: "",
     verificationToken,
     emailVerificationDeadline,
   });
 
   // Надіслати верифікаційний лист
-  // await sendVerificationEmail(email, verificationToken);
   await sendVerificationEmail({ to: email, verificationToken });
 
   // Create and send token
@@ -343,6 +342,7 @@ const googleLogin = async (req, res) => {
           name: given_name || `User_${googleId}`,
           avatarURL: picture,
           playerGameId,
+          isEmailVerified: true,
         });
       }
 
