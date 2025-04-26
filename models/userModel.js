@@ -51,15 +51,9 @@ const mongooseUserSchema = new Schema(
       // "message": "E11000 duplicate key error collection: phone_book_db.users index: email_1 dup key: { email: \"andrii@vestibul.co.uk\" }"
     },
 
-    isEmailVerified: {
-      type: Boolean,
-      default: false,
-    },
-    emailVerificationDeadline: { type: Date }, // Дедлайн для верифікації email
-    verificationToken: {
-      type: String,
-      default: null,
-    },
+    isEmailVerified: { type: Boolean, default: false },
+    emailVerificationDeadline: { type: Date, default: null }, // Дедлайн для верифікації email
+    verificationToken: { type: String, default: null },
 
     password: {
       type: String,
@@ -80,6 +74,8 @@ const mongooseUserSchema = new Schema(
     userActiveGameId: { type: String, sparse: true },
 
     refreshToken: { type: String, default: null },
+    resetToken: { type: String, default: null },
+    resetTokenExpiry: { type: Date, default: null },
   },
   { versionKey: false, timestamps: true },
 );
@@ -109,9 +105,19 @@ const setPassword = Joi.object({
 
 const resendVerification = Joi.object({});
 
+const forgotPassword = Joi.object({
+  email: Joi.string().required(),
+});
+
+const resetPassword = Joi.object({
+  password: Joi.string().min(3).max(150).required(),
+});
+
 export const joiUserSchemas = {
   registerUser,
   loginUser,
   setPassword,
   resendVerification,
+  forgotPassword,
+  resetPassword,
 };

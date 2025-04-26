@@ -53,6 +53,21 @@ authRouter.post(
   authController.setPassword,
 );
 
+// введення email на який тре відправити посилання на відновлення паролю
+authRouter.post(
+  "/forgot-password",
+  authRateLimiter,
+  checkErrorJoiSchemaDecorator(joiUserSchemas.forgotPassword),
+  authController.forgotPassword,
+);
+
+// створення нового паролю (відновлення після того як забув)
+authRouter.post(
+  "/reset-password/:resetToken",
+  checkErrorJoiSchemaDecorator(joiUserSchemas.resetPassword),
+  authController.resetPassword,
+);
+
 // logout
 authRouter.post(
   "/logout",

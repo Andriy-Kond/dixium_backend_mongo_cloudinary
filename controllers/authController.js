@@ -12,6 +12,7 @@ import { tryCatchDecorator } from "../utils/tryCatchDecorator.js";
 import { OAuth2Client } from "google-auth-library";
 import { generateUniquePlayerGameId } from "../utils/generateUniquePlayerGameId.js";
 import { sendVerificationEmail } from "../utils/sendVerificationEmail.js";
+import { sendResetPasswordEmail } from "../utils/sendResetPasswordEmail.js";
 
 const { SECRET_KEY = "", GOOGLE_CLIENT_ID = "" } = process.env;
 const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
@@ -406,6 +407,59 @@ const getCurrentUser = (req, res) => {
   });
 };
 
+// email, на який треба відправити відновлення паролю:
+const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    throw HttpError({
+      status: 404,
+      message: "User with this email does not exist.",
+    });
+  }
+
+  const resetToken = nanoid();
+  const resetTokenExpiry = new Date(Date.now() + 1 * 60 * 60 * 1000); // термін дії токена 1 година
+
+  await User.findByIdAndUpdate(user._id, {
+    resetToken,
+    resetTokenExpiry,
+  });
+
+  await sendResetPasswordEmail({ to: email, resetToken });
+
+  res.json({ message: "Password reset email sent successfully." });
+  res.redirect(`${process.env.FRONTEND_URL}/login?reset=true`);
+};
+
+// скидання паролю
+const resetPassword = async (req, res) => {
+  const { resetToken } = req.params;
+  const { password } = req.body;
+
+  const user = await User.findOne({
+    resetToken,
+    resetTokenExpiry: { $gt: new Date() }, // greater than: MongoDB шукатиме документи, де значення поля resetTokenExpiry більше, ніж поточний час. Якщо resetTokenExpiry <= поточному часу, токен вважається простроченим, і користувач не знайдеться (user буде null).
+  });
+
+  if (!user) {
+    throw HttpError({
+      status: 400,
+      message: "Invalid or expired reset token.",
+    });
+  }
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+  await User.findByIdAndUpdate(user._id, {
+    password: hashedPassword,
+    resetToken: null,
+    resetTokenExpiry: null,
+  });
+
+  res.json({ message: "Password reset successfully." });
+};
+
 const logout = async (req, res) => {
   const { _id } = req.user;
   await User.findByIdAndUpdate(_id, { token: "" });
@@ -444,6 +498,8 @@ export const authController = {
   login: tryCatchDecorator(login),
   googleLogin: tryCatchDecorator(googleLogin),
   getCurrentUser: tryCatchDecorator(getCurrentUser),
+  forgotPassword: tryCatchDecorator(forgotPassword),
+  resetPassword: tryCatchDecorator(resetPassword),
   logout: tryCatchDecorator(logout),
   changeAvatar: tryCatchDecorator(changeAvatar),
   setPassword: tryCatchDecorator(setPassword),
