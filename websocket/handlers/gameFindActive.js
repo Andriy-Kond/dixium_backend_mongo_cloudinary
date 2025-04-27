@@ -47,7 +47,11 @@ export const gameFindActive = async ({
     // await user.save();
 
     socket.emit("gameFound", { game }); // update game for user who sent this request
-    // socket.emit("updateUserCredentials", { user }); // update user credentials of room users
+
+    // socket.emit("updateUserCredentials", { user }); // update user credentials
+    // socket.emit("UserActiveGameId:Update", {
+    //   userActiveGameId: user.userActiveGameId,
+    // });
   } catch (err) {
     console.error("Error finding game:", err);
     socketEmitError({

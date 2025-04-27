@@ -31,7 +31,7 @@ export const gameDelete = async ({ gameId, userId, socket, io }) => {
     // await Model.updateMany(filter, update, options);
     await User.updateMany(
       { _id: { $in: playerIds } }, // filter - вибирає всіх користувачів, чиї _id є в масиві playerIds.
-      { userActiveGameId: "" },
+      { userActiveGameId: null },
       { session },
     );
 
@@ -41,8 +41,7 @@ export const gameDelete = async ({ gameId, userId, socket, io }) => {
     io.emit("gameDeleted", { game }); // send update to all users
 
     // Clear userActiveGameId for all in room
-    const user = { userActiveGameId: "" };
-    io.to(gameId).emit("updateUserCredentials", { user });
+    io.to(gameId).emit("UserActiveGameId:Update", { userActiveGameId: null });
 
     // io.to(updatedGame._id).emit("userDeletedFromGame", { game, deletedUser });
   } catch (err) {

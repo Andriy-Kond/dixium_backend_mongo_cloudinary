@@ -1,6 +1,7 @@
 import { User } from "../../models/userModel.js";
 import { findGameAndUpdateOrFail } from "../../services/gameServices.js";
 import { socketEmitError } from "../socketEmitError.js";
+import { emitUserActiveGameIdUpdate } from "../socketUtils.js";
 
 export const deleteUserFromGame = async ({
   updatedGame,
@@ -17,17 +18,25 @@ export const deleteUserFromGame = async ({
     const deletedUser = await User.findById(deletedUserId);
     if (!deletedUser) {
       socketEmitError({
-        errorMessage: `User with id ${deletedUserId} not found`,
+        errorMessage: `Can't delete user: user with id ${deletedUserId} not found`,
         socket,
       });
+    }
+    deletedUser.userActiveGameId = null;
+    await deletedUser.save();
+
+    // Відправити UserActiveGameId:Update конкретному користувачу
+    const socketId = getUserSocketIds(deletedUserId);
+    if (socketId) {
+      io.to(socketId).emit("UserActiveGameId:Update", {
+        userActiveGameId: null,
+      });
     } else {
-      deletedUser.userActiveGameId = "";
-      await deletedUser.save();
+      console.log(`Socket for user ${deletedUserId} not found`);
     }
 
-    //send to all in room for delete player from current game (deleted user still in room)
+    //send to all in room - delete player from current game (deleted user still in room?)
     io.to(updatedGame._id).emit("userDeletedFromGame", { game, deletedUser });
-    // socket.emit("updateUserCredentials", { deletedUser }); // update user credentials of room users
   } catch (err) {
     console.error("Error in handling delete user from game:", err);
     socketEmitError({

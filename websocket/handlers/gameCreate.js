@@ -19,9 +19,15 @@ export const gameCreate = async ({ gameData, socket, io }) => {
 
     user.userActiveGameId = game._id;
     await user.save();
+    console.log(
+      " gameCreate >> user.userActiveGameId:::",
+      user.userActiveGameId,
+    );
 
     socket.emit("gameCreated", { game }); // send new game to user who created this game
-    socket.emit("updateUserCredentials", { user }); // update user credentials
+    socket.emit("UserActiveGameId:Update", {
+      userActiveGameId: user.userActiveGameId,
+    });
     // console.log(" gameCreate >> user:::", user);
     // gameCreate >> user::: {
     //   _id: new ObjectId('67fe6ea01bd21e525b20cd38'),

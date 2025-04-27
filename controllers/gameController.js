@@ -1,7 +1,6 @@
+// import { createNewGame } from "../services/gameServices.js";
 import { Game } from "../models/gameModel.js";
 import { tryCatchDecorator } from "../utils/tryCatchDecorator.js";
-
-// import { createNewGame } from "../services/gameServices.js";
 
 const getAllGames = async (req, res) => {
   console.log("get all games");
@@ -19,7 +18,7 @@ const getCurrentGame = async (req, res) => {
   console.log("get Current Game");
   const game = await Game.findOne({ _id: req.params.id }); // find by game _id
 
-  console.log(" getCurrentGame >> game:::", game);
+  // console.log(" getCurrentGame >> game:::", game);
   res.json(game);
 };
 
@@ -71,7 +70,7 @@ export const gameController = {
   getAllGames: tryCatchDecorator(getAllGames),
   getCurrentGame: tryCatchDecorator(getCurrentGame),
   findGame: tryCatchDecorator(findGame),
-  // createGame: tryCatchDecorator(createGame),
   removeGame: tryCatchDecorator(removeGame),
-  // updateGame: tryCatchDecorator(updateGame),
 };
+// updateGame: tryCatchDecorator(updateGame),
+// createGame: tryCatchDecorator(createGame),

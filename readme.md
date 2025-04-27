@@ -38,9 +38,9 @@ try to node v22 - ніби працює.
 ```
 
 ```js
-await User.updateMany({ _id: { $in: playerIds } }, { userActiveGameId: "" });
+await User.updateMany({ _id: { $in: playerIds } }, { userActiveGameId: null });
 // _id: { $in: playerIds }: Шукає всіх користувачів, чиї _id є в масиві playerIds.
-// Дія: Оновлює поле userActiveGameId до порожнього рядка ("") для всіх знайдених користувачів.
+// Дія: Оновлює поле userActiveGameId до null для всіх знайдених користувачів.
 ```
 
 ```

@@ -16,17 +16,14 @@ export const gameDelete = async ({ gameId, userId, socket, io }) => {
     const playerIds = game.players.map(p => p._id);
     await User.updateMany(
       { _id: { $in: playerIds } },
-      { userActiveGameId: "" },
+      { userActiveGameId: null },
     );
 
     // delete game for all (if they found it right now for example)
     io.emit("gameDeleted", { game }); // send update to all users
 
     // Clear userActiveGameId for all in room
-    // io.to(gameId).emit("updateUserCredentials", { user });
-
-    const user = { userActiveGameId: "" };
-    io.to(gameId).emit("updateUserCredentials", { user });
+    io.to(gameId).emit("UserActiveGameId:Update", { userActiveGameId: null });
 
     // io.to(updatedGame._id).emit("userDeletedFromGame", { game, deletedUser });
   } catch (err) {

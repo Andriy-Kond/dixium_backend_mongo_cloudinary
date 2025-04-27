@@ -60,7 +60,9 @@ export const startOrJoinToGame = async ({ gameId, player, socket, io }) => {
       }), // send message only if it first join player to game
     });
 
-    socket.emit("updateUserCredentials", { user }); // update user credentials
+    socket.emit("UserActiveGameId:Update", {
+      userActiveGameId: user.userActiveGameId,
+    });
   } catch (err) {
     console.log("Error start or join to game action:", err);
     socketEmitError({

@@ -63,7 +63,7 @@ const register = async (req, res) => {
     playerGameId, // type: Number()
     // googleId: null,
     // appleId: null,
-    userActiveGameId: "",
+    // userActiveGameId: null,
     verificationToken,
     emailVerificationDeadline,
   });
@@ -116,10 +116,10 @@ const register = async (req, res) => {
     _id: newUser._id,
     name: newUser.name,
     email: newUser.email,
-    token: newUser.token,
-    avatarURL: newUser.avatarURL, // todo видалити звідси, а також з login, googleLogin, etc.
+    token: newUser.token, // todo видалити звідси, а також з login, googleLogin, etc.
+    avatarURL: newUser.avatarURL,
     playerGameId: newUser.playerGameId,
-    userActiveGameId: newUser.userActiveGameId,
+    // userActiveGameId: newUser.userActiveGameId,
   });
 };
 
@@ -269,7 +269,7 @@ const login = async (req, res) => {
     token: user.token, // todo прибрати
     avatarURL: user.avatarURL,
     playerGameId: user.playerGameId,
-    userActiveGameId: user.userActiveGameId,
+    // userActiveGameId: user.userActiveGameId,
   });
 
   // console.log(" login >> ...user._doc,:::", user._doc);
@@ -370,7 +370,7 @@ const googleLogin = async (req, res) => {
       token: user.token, // todo прибрати
       avatarURL: user.avatarURL,
       playerGameId: user.playerGameId,
-      userActiveGameId: user.userActiveGameId,
+      // userActiveGameId: user.userActiveGameId,
     });
   } catch (error) {
     throw HttpError({ status: 401, message: "Invalid Google token" });
@@ -403,7 +403,7 @@ const getCurrentUser = (req, res) => {
     token: req.user.token,
     avatarURL: req.user.avatarURL,
     playerGameId: req.user.playerGameId,
-    userActiveGameId: req.user.userActiveGameId,
+    // userActiveGameId: req.user.userActiveGameId,
   });
 };
 

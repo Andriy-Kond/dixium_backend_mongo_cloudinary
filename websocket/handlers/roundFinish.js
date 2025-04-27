@@ -29,12 +29,15 @@ export const roundFinish = async ({ updatedGame, socket, io }) => {
       const playerIds = game.players.map(p => p._id);
       await User.updateMany(
         { _id: { $in: playerIds } },
-        { userActiveGameId: "" },
+        { userActiveGameId: null },
       );
 
       io.to(updatedGame._id).emit("gameEnd", { game });
-      const user = { userActiveGameId: "" };
-      io.to(updatedGame._id).emit("updateUserCredentials", { user });
+
+      // Clear userActiveGameId for all players in room (maybe need use it after push some button "Finish" on the client, because it will clear active game from render)
+      io.to(updatedGame._id).emit("UserActiveGameId:Update", {
+        userActiveGameId: null,
+      });
     }
   } catch (err) {
     console.error("Error in handling current game run:", err);

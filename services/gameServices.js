@@ -1,14 +1,7 @@
 import { Game } from "../models/gameModel.js";
-import { socketEmitError } from "../websocket/socketEmitError.js";
 import { generateGameName } from "../utils/generateGameName.js";
 import { getRandomItem } from "../utils/getRandomItem.js";
-import {
-  LOBBY,
-  GUESSING,
-  VOTING,
-  ROUND_RESULTS,
-  FINISH,
-} from "../utils/generals/constants.js";
+import { FINISH } from "../utils/generals/constants.js";
 import { HttpError } from "../utils/HttpError.js";
 import { User } from "../models/userModel.js";
 

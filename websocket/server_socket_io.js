@@ -1,7 +1,6 @@
 import { createServer } from "http";
 import { Server } from "socket.io";
 import { app } from "../app.js";
-import { Game } from "../models/gameModel.js";
 
 import {
   deleteUserFromGame,
@@ -21,6 +20,7 @@ import {
   setNextStoryteller,
   gameFindActive,
 } from "./handlers/index.js";
+import { registerUserId, userDisconnect } from "./socketUtils.js";
 
 export const httpServer = createServer(app);
 export const io = new Server(httpServer, { cors: { origin: "*" } });
@@ -103,6 +103,10 @@ app.use((req, res, next) => {
 io.on("connection", socket => {
   console.log(`User connected: ${socket.id}`);
 
+  const handleRegisterUserId = ({ userId }) => registerUserId(userId, socket);
+
+  const handleUserDisconnect = () => userDisconnect(socket);
+
   const handleGameUpdateFirstTurn = async ({ updatedGame }) =>
     gameUpdateFirstTurn({ updatedGame, socket });
 
@@ -112,9 +116,8 @@ io.on("connection", socket => {
   const handleStartOrJoinToGame = async ({ gameId, player }) =>
     startOrJoinToGame({ gameId, player, socket, io });
 
-  const handleDeleteUserFromGame = async ({ updatedGame, deletedUserId }) => {
+  const handleDeleteUserFromGame = async ({ updatedGame, deletedUserId }) =>
     deleteUserFromGame({ updatedGame, deletedUserId, socket, io });
-  };
 
   const handleGameRun = async ({ updatedGame }) =>
     gameRun({ updatedGame, socket, io });
@@ -128,47 +131,39 @@ io.on("connection", socket => {
   const handleNewPlayersOrder = async ({ updatedGame }) =>
     newPlayersOrder({ updatedGame, socket, io });
 
-  const handleSetFirstStoryteller = async ({ updatedGame }) => {
+  const handleSetFirstStoryteller = async ({ updatedGame }) =>
     setFirstStoryteller({ updatedGame, socket, io });
-  };
 
-  const handleSetNextStoryteller = async ({ updatedGame }) => {
+  const handleSetNextStoryteller = async ({ updatedGame }) =>
     setNextStoryteller({ updatedGame, socket, io });
-  };
 
-  const handleGuess = async ({ updatedGame }) => {
+  const handleGuess = async ({ updatedGame }) =>
     guess({ updatedGame, socket, io });
-  };
 
-  const handleStartVoting = async ({ updatedGame }) => {
+  const handleStartVoting = async ({ updatedGame }) =>
     startVoting({ updatedGame, socket, io });
-  };
 
-  const handleVote = async ({ updatedGame }) => {
+  const handleVote = async ({ updatedGame }) =>
     vote({ updatedGame, socket, io });
-  };
 
-  const handleRoundFinish = async ({ updatedGame }) => {
-    console.log("handleRoundFinish");
+  const handleRoundFinish = async ({ updatedGame }) =>
     roundFinish({ updatedGame, socket, io });
-  };
 
-  const handleStartNewRound = async ({ updatedGame }) => {
-    console.log("handleStartNewRound");
+  const handleStartNewRound = async ({ updatedGame }) =>
     startNewRound({ updatedGame, socket, io });
-  };
 
-  const handleGameFindActive = async ({ searchGameNumber, initUserId }) => {
-    console.log("handleFindGame");
+  const handleGameFindActive = async ({ searchGameNumber, initUserId }) =>
     gameFindActive({ searchGameNumber, initUserId, socket, io });
-  };
+
+  socket.on("registerUserId", handleRegisterUserId);
+  socket.on("disconnect", handleUserDisconnect);
 
   socket.on("gameUpdateFirstTurn", handleGameUpdateFirstTurn);
   socket.on("createGame", handleGameCreate);
   socket.on("startOrJoinToGame", handleStartOrJoinToGame);
   socket.on("deleteUserFromGame", handleDeleteUserFromGame);
   socket.on("gameRun", handleGameRun);
-  socket.on("deleteGame", handleGameDelete);
+  socket.on("Game:Delete", handleGameDelete);
   socket.on("joinToGameRoom", handleJoinToGameRoom);
   socket.on("newPlayersOrder", handleNewPlayersOrder);
 
