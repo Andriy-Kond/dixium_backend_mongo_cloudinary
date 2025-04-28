@@ -7,6 +7,7 @@ const userSocketMap = new Map(); // Мапа гравців - щоб прив'я
 // CONNECTION ==================
 // Для роботи з одного пристрою:
 export const registerUserId = (userId, socket) => {
+  console.log("registerUserId");
   // Клієнт надсилає свій user._id при підключенні
   userSocketMap.set(userId, socket.id);
   console.log(`Registered user ${userId} with socket ${socket.id}`);
@@ -15,6 +16,7 @@ export const registerUserId = (userId, socket) => {
 // Якщо клієнт відкриє додаток на кількох пристроях одночасно в нього буде однаковий ID, але у Map() залишиться останній.
 // Тому можна створити масив сокетів для одного ID для роботи з кількох пристроїв:
 export const registerUserIdForManyDevices = (userId, socket) => {
+  console.log("registerUserIdForManyDevices");
   if (!userSocketMap.has(userId)) userSocketMap.set(userId, new Set());
 
   userSocketMap.get(userId).add(socket.id);
@@ -76,7 +78,7 @@ export function emitUserActiveGameForManyDevices(deletedUserId, io) {
   }
 }
 
-export const getUserSocketIds = userId => userSocketMap.get(userId);
+export const getUserSocketIds = userId => userSocketMap.get(userId) || null;
 
 export const getUserSocketIdsForManyDevices = userId =>
   userSocketMap.get(userId) || new Set();

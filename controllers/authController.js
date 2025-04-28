@@ -116,7 +116,7 @@ const register = async (req, res) => {
     _id: newUser._id,
     name: newUser.name,
     email: newUser.email,
-    token: newUser.token, // todo видалити звідси, а також з login, googleLogin, etc.
+    token: newUser.token, // todo прибрати при переході на cookie.
     avatarURL: newUser.avatarURL,
     playerGameId: newUser.playerGameId,
     // userActiveGameId: newUser.userActiveGameId,
@@ -266,7 +266,7 @@ const login = async (req, res) => {
     _id: user._id,
     name: user.name,
     email: user.email,
-    token: user.token, // todo прибрати
+    token: user.token, // todo прибрати при переході на cookie.
     avatarURL: user.avatarURL,
     playerGameId: user.playerGameId,
     // userActiveGameId: user.userActiveGameId,
@@ -367,7 +367,7 @@ const googleLogin = async (req, res) => {
       _id: user._id,
       name: user.name,
       email: user.email,
-      token: user.token, // todo прибрати
+      token: user.token, // todo прибрати при переході на cookie.
       avatarURL: user.avatarURL,
       playerGameId: user.playerGameId,
       // userActiveGameId: user.userActiveGameId,
@@ -400,7 +400,7 @@ const getCurrentUser = (req, res) => {
     _id: req.user._id,
     name: req.user.name,
     email: req.user.email,
-    token: req.user.token,
+    token: req.user.token, // todo прибрати при переході на cookie.
     avatarURL: req.user.avatarURL,
     playerGameId: req.user.playerGameId,
     // userActiveGameId: req.user.userActiveGameId,
@@ -463,6 +463,13 @@ const resetPassword = async (req, res) => {
 const logout = async (req, res) => {
   const { _id } = req.user;
   await User.findByIdAndUpdate(_id, { token: "" });
+
+  // todo При переході на cookie - видалити токен і на клієнті через .clearCookie:
+  // res.clearCookie("token", {
+  //   httpOnly: true,
+  //   secure: process.env.NODE_ENV === "production",
+  //   sameSite: "strict",
+  // });
 
   res.json({ message: "Logout success" });
 };

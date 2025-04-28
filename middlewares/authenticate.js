@@ -65,34 +65,32 @@ export const authenticate = async (req, res, next) => {
   }
 };
 
-// Якщо використовувати cookies:
+// todo При переході на cookies додати цей код замість того, що вище (перевірити що саме видаляти вище):
 export const authenticateWithCookies = async (req, res, next) => {
   const { token } = req.cookies;
 
-  if (!token) {
+  if (!token)
     next(HttpError({ status: 401, message: "Unauthorized - токен відсутній" }));
-  }
 
   try {
     const payload = jwt.verify(token, SECRET_KEY);
     const user = await User.findById(payload.id);
 
-    if (!user) {
+    if (!user)
       next(
         HttpError({
           status: 401,
           message: "Unauthorized - користувача не знайдено",
         }),
       );
-    }
-    if (!user.token || user.token !== token) {
+
+    if (!user.token || user.token !== token)
       next(
         HttpError({
           status: 401,
           message: "Unauthorized - токен недійсний або скасований",
         }),
       );
-    }
 
     req.user = user;
     next();

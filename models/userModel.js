@@ -61,7 +61,7 @@ const mongooseUserSchema = new Schema(
       required: false, // Дозволяє null/undefined для користувачів Google
       validate: passwordValidator,
     },
-    token: { type: String, default: "" },
+    token: { type: String, default: "" }, // todo прибрати при переході на cookie
     avatarURL: { type: String, required: true, default: "" },
     googleId: {
       type: String,

@@ -103,9 +103,21 @@ app.use((req, res, next) => {
 io.on("connection", socket => {
   console.log(`User connected: ${socket.id}`);
 
-  const handleRegisterUserId = ({ userId }) => registerUserId(userId, socket);
+  const handleRegisterUserId = ({ userId }) => {
+    console.log("handleRegisterUserId");
+    if (!userId) {
+      console.warn(`Received invalid userId: ${userId}`);
+      console.log(" gameUpdateFirstTurn:::", gameUpdateFirstTurn);
+      return;
+    }
+    registerUserId(userId, socket);
+  };
 
-  const handleUserDisconnect = () => userDisconnect(socket);
+  const handleUserDisconnect = () => {
+    console.log("handleUserDisconnect");
+    console.log(`Socket disconnected, socket.id: ${socket.id}`);
+    userDisconnect(socket);
+  };
 
   const handleGameUpdateFirstTurn = async ({ updatedGame }) =>
     gameUpdateFirstTurn({ updatedGame, socket });
@@ -125,8 +137,8 @@ io.on("connection", socket => {
   const handleGameDelete = async ({ gameId, userId }) =>
     gameDelete({ gameId, userId, socket, io });
 
-  const handleJoinToGameRoom = async ({ gameId, player }) =>
-    joinToGameRoom({ gameId, player, socket });
+  const handleJoinToGameRoom = async ({ gameId, userId }) =>
+    joinToGameRoom({ gameId, userId, socket });
 
   const handleNewPlayersOrder = async ({ updatedGame }) =>
     newPlayersOrder({ updatedGame, socket, io });
