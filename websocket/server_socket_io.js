@@ -107,7 +107,6 @@ io.on("connection", socket => {
     console.log("handleRegisterUserId");
     if (!userId) {
       console.warn(`Received invalid userId: ${userId}`);
-      console.log(" gameUpdateFirstTurn:::", gameUpdateFirstTurn);
       return;
     }
     registerUserId(userId, socket);
@@ -168,17 +167,17 @@ io.on("connection", socket => {
     gameFindActive({ searchGameNumber, initUserId, socket, io });
 
   socket.on("registerUserId", handleRegisterUserId);
-  socket.on("disconnect", handleUserDisconnect);
 
+  socket.on("disconnect", handleUserDisconnect);
   socket.on("gameUpdateFirstTurn", handleGameUpdateFirstTurn);
   socket.on("createGame", handleGameCreate);
   socket.on("startOrJoinToGame", handleStartOrJoinToGame);
   socket.on("deleteUserFromGame", handleDeleteUserFromGame);
   socket.on("gameRun", handleGameRun);
   socket.on("Game:Delete", handleGameDelete);
+
   socket.on("joinToGameRoom", handleJoinToGameRoom);
   socket.on("newPlayersOrder", handleNewPlayersOrder);
-
   socket.on("setFirstStoryteller", handleSetFirstStoryteller);
   socket.on("setNextStoryteller", handleSetNextStoryteller);
   socket.on("playerGuessing", handleGuess);
@@ -186,7 +185,6 @@ io.on("connection", socket => {
   socket.on("playerVoting", handleVote);
   socket.on("roundFinish", handleRoundFinish);
   socket.on("startNewRound", handleStartNewRound);
-
   socket.on("gameFindActive", handleGameFindActive); // пошук гри (активної)
 
   socket.on("disconnect", () => {

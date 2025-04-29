@@ -2,13 +2,12 @@ import { findGameAndUpdateOrFail } from "../../services/gameServices.js";
 import { socketEmitError } from "../socketEmitError.js";
 
 export const gameRun = async ({ updatedGame, socket, io }) => {
-  console.log("handleGameRun");
+  console.log("gameRun");
 
-  const event = "gameRunning";
-  if (updatedGame.players.length < 3) {
+  const event = "Game_Running";
+  if (updatedGame.players.length < 3 || updatedGame.players.length > 12) {
     socketEmitError({
-      errorMessage:
-        "Game not started: quantity of players must be from 3 to 12",
+      errorMessage: "Game not started: quantity of players must be 3-12",
       socket,
     });
     return;
@@ -16,7 +15,10 @@ export const gameRun = async ({ updatedGame, socket, io }) => {
 
   try {
     const { game, errorMessage } = await findGameAndUpdateOrFail(updatedGame);
-    if (errorMessage) return socketEmitError({ errorMessage, socket });
+    if (errorMessage) {
+      socket.emit(event, { updatedGame, message: errorMessage }); // send OLD game!
+      return socketEmitError({ errorMessage, socket });
+    }
 
     io.emit(event, { game }); // to all, for disable button "join to game"
   } catch (err) {

@@ -7,6 +7,7 @@ export const setFirstStoryteller = async ({ updatedGame, socket, io }) => {
   const event = "firstStorytellerUpdated";
   try {
     const { game, errorMessage } = await findGameByIdOrFail(updatedGame._id);
+    console.log(" setFirstStoryteller >> errorMessage:::", errorMessage);
     if (errorMessage) return socketEmitError({ errorMessage, socket });
 
     // Якщо оповідач уже встановлений, відхиляємо запит

@@ -11,6 +11,8 @@ export const joinToGameRoom = async ({ gameId, userId, socket }) => {
 
   try {
     const { game, errorMessage } = await findGameByIdOrFail(gameId);
+    console.log(" joinToGameRoom >> errorMessage:::", errorMessage);
+
     if (errorMessage) return socketEmitError({ errorMessage, socket });
 
     // Перевіряємо, чи гравець у грі

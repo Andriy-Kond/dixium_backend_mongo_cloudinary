@@ -1,7 +1,7 @@
 import { User } from "../../models/userModel.js";
 import { findGameAndUpdateOrFail } from "../../services/gameServices.js";
 import { socketEmitError } from "../socketEmitError.js";
-import { emitUserActiveGameIdUpdate } from "../socketUtils.js";
+import { getUserSocketIds } from "../socketUtils.js";
 
 export const deleteUserFromGame = async ({
   updatedGame,

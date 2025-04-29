@@ -24,6 +24,7 @@ export const gameFindActive = async ({
     });
 
     if (!game) {
+      socket.emit("gameFound", { game: null });
       return socketEmitError({
         errorMessage: `A game with number ${searchGameNumber} not found or already finished`,
         socket,

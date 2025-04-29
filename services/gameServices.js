@@ -38,10 +38,12 @@ async function createNewGame(gameData) {
 
 // Перевірка, чи гра існує
 async function findGameByIdOrFail(gameId) {
+  console.log(" findGameByIdOrFail >> gameId:::", gameId);
+  console.log("findGameByIdOrFail");
   const game = await Game.findById(gameId);
   if (!game)
     return {
-      errorMessage: `Error: The game with id ${gameId} not found`,
+      errorMessage: `Error: The game with id ${gameId} not found!`,
     };
 
   // todo: add isGameFinished
@@ -77,8 +79,6 @@ async function findGameAndUpdateOrFail(updatedGame) {
   //   });
   //   return null;
   // }
-  console.log(" findGameAndUpdateOrFail >> playersOrderUpdated:::");
-
   return { game };
 }
 

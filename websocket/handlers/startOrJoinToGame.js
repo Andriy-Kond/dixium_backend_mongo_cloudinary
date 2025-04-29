@@ -7,9 +7,10 @@ export const startOrJoinToGame = async ({ gameId, player, socket, io }) => {
 
   try {
     const { game, errorMessage } = await findGameByIdOrFail(gameId);
+    console.log(" startOrJoinToGame >> errorMessage:::", errorMessage);
     if (errorMessage) return socketEmitError({ errorMessage, socket });
 
-    // If game not started only host can start it
+    //* If game not started only host can start it
     if (!game.isGameStarted) {
       // check if the player is the host
       if (game.hostPlayerId !== player._id)
@@ -19,18 +20,18 @@ export const startOrJoinToGame = async ({ gameId, player, socket, io }) => {
         });
 
       game.isGameStarted = true;
+      io.emit("Game_Started", { game });
     }
 
     const isPlayerInGame = game.players.some(
       p => p._id.toString() === player._id.toString(),
     );
 
-    // Add player to game if he still not in game
+    //* Add player to game if he still not in game
     if (!isPlayerInGame) game.players.push(player);
+    await game.save();
 
-    await game.save(); // save all changes
-
-    // update field userActiveGameId
+    //* update field userActiveGameId
     const user = await User.findById(player._id);
     if (!user) {
       return socketEmitError({
@@ -41,7 +42,7 @@ export const startOrJoinToGame = async ({ gameId, player, socket, io }) => {
     user.userActiveGameId = gameId;
     await user.save();
 
-    // Приєднуємо сокет до кімнати
+    //* Приєдную сокет до кімнати
     // joinSocketToRoom(socket, gameId, player);
     socket.join(gameId);
     console.log(
@@ -51,7 +52,7 @@ export const startOrJoinToGame = async ({ gameId, player, socket, io }) => {
     // update game for all users
     // io.emit("playerStartOrJoinToGame", { game, player });
 
-    // Notify room
+    //* Notify room
     io.to(gameId).emit("playerJoined", {
       game,
       player,

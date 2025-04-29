@@ -7,6 +7,7 @@ export const setNextStoryteller = async ({ updatedGame, socket, io }) => {
   const event = "nextStorytellerUpdated";
   try {
     const { game, errorMessage } = await findGameByIdOrFail(updatedGame._id);
+    console.log(" setNextStoryteller >> errorMessage:::", errorMessage);
     if (errorMessage) return socketEmitError({ errorMessage, socket });
 
     game.set({ ...updatedGame });
