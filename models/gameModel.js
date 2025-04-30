@@ -24,6 +24,7 @@ const GameSchema = new Schema(
     isGameStarted: Boolean, // game started but not running (players can join)
     isFirstTurn: Boolean,
     isSingleCardMode: Boolean,
+    finishPoints: Number,
 
     hostPlayerId: String, // id творця гри
     hostPlayerName: String, // Ім'я творця гри

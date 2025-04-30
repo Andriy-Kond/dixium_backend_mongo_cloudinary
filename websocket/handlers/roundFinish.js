@@ -20,7 +20,7 @@ export const roundFinish = async ({ updatedGame, socket, io }) => {
     console.log(" roundFinish >> maxScore:::", maxScore);
 
     // Game END
-    if (maxScore >= 30) {
+    if (maxScore >= game.finishPoints) {
       console.log("gameEnd");
       game.gameStatus = FINISH;
       await game.save();
