@@ -102,7 +102,11 @@ const loginUser = Joi.object({
 });
 
 const setPassword = Joi.object({
-  password: Joi.string().min(3).max(150).required(),
+  password: Joi.string().min(3).max(100).required(),
+});
+
+const setNickname = Joi.object({
+  nickname: Joi.string().min(3).max(30).required(),
 });
 
 const resendVerification = Joi.object({});
@@ -112,7 +116,7 @@ const forgotPassword = Joi.object({
 });
 
 const resetPassword = Joi.object({
-  password: Joi.string().min(3).max(150).required(),
+  password: Joi.string().min(3).max(100).required(),
 });
 
 export const joiUserSchemas = {
@@ -122,4 +126,5 @@ export const joiUserSchemas = {
   resendVerification,
   forgotPassword,
   resetPassword,
+  setNickname,
 };

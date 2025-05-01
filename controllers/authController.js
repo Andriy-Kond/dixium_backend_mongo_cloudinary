@@ -290,6 +290,17 @@ const setPassword = async (req, res) => {
   res.json({ message: "Setup password success!" });
 };
 
+const setNickname = async (req, res) => {
+  const { nickname } = req.body;
+  const { _id } = req.user; // req.user додається у middleware authenticate.js
+
+  if (!nickname) throw HttpError({ status: 400, message: "Name is required!" });
+
+  await User.findByIdAndUpdate(_id, { name: nickname });
+
+  res.json({ message: "Setup name success!", name: nickname });
+};
+
 const googleLogin = async (req, res) => {
   console.log("googleLogin");
   // Перевіряє Google-токен.
@@ -510,5 +521,6 @@ export const authController = {
   logout: tryCatchDecorator(logout),
   changeAvatar: tryCatchDecorator(changeAvatar),
   setPassword: tryCatchDecorator(setPassword),
+  setNickname: tryCatchDecorator(setNickname),
   resendVerificationEmail: tryCatchDecorator(resendVerificationEmail),
 };

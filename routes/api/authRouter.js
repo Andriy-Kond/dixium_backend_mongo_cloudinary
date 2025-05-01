@@ -53,6 +53,13 @@ authRouter.post(
   authController.setPassword,
 );
 
+authRouter.post(
+  "/set-nickname",
+  authenticate,
+  checkErrorJoiSchemaDecorator(joiUserSchemas.setNickname),
+  authController.setNickname,
+);
+
 // введення email на який тре відправити посилання на відновлення паролю
 authRouter.post(
   "/forgot-password",
