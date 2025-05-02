@@ -29,7 +29,7 @@ async function createNewGame(gameData) {
 
   const newGame = new Game(gameData);
   newGame.gameName = generateGameName();
-  newGame.gamePoster = getRandomItem(newGame.deck).public_id;
+  // newGame.gamePoster = getRandomItem(newGame.deck).public_id;
   newGame.playerGameId = user.playerGameId;
   await newGame.save();
 

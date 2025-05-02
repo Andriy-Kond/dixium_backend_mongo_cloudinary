@@ -1,6 +1,7 @@
 import { User } from "../../models/userModel.js";
 import { createNewGame } from "../../services/gameServices.js";
 import { socketEmitError } from "../socketEmitError.js";
+import { startOrJoinToGame } from "./startOrJoinToGame.js";
 
 export const gameCreate = async ({ gameData, socket, io }) => {
   console.log("gameCreate");
@@ -23,6 +24,16 @@ export const gameCreate = async ({ gameData, socket, io }) => {
       " gameCreate >> user.userActiveGameId:::",
       user.userActiveGameId,
     );
+
+    const hostPlayer = {
+      _id: gameData.hostPlayerId,
+      name: gameData.hostPlayerName,
+      hand: [],
+      isGuessed: false,
+      isVoted: false,
+    };
+
+    startOrJoinToGame({ gameId: game._id, player: hostPlayer, socket, io });
 
     socket.emit("gameCreated", { game }); // send new game to user who created this game
     socket.emit("UserActiveGameId:Update", {
