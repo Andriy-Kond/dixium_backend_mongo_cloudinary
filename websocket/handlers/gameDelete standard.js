@@ -23,7 +23,7 @@ export const gameDelete = async ({ gameId, userId, socket, io }) => {
     io.emit("gameDeleted", { game }); // send update to all users
 
     // Clear userActiveGameId for all in room
-    io.to(gameId).emit("UserActiveGameId:Update", { userActiveGameId: null });
+    io.to(gameId).emit("UserActiveGameId_Updated", { userActiveGameId: null });
 
     // io.to(updatedGame._id).emit("userDeletedFromGame", { game, deletedUser });
   } catch (err) {

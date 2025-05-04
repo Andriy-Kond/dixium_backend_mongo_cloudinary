@@ -73,3 +73,76 @@ await User.updateMany({ _id: { $in: playerIds } }, { userActiveGameId: null });
     $exists: Перевіряє, чи існує поле (field: { $exists: true }).
     $type: Перевіряє тип поля (field: { $type: "string" }).
 ```
+
+# socket watch stream
+
+```js
+const changeStream = Game.watch(); // ??? await Game.watch() ???
+changeStream.on("change", change => {
+  // console.log("change:::", change);
+  console.log(
+    "change.updateDescription.updatedFields :>> ",
+    change?.updateDescription?.updatedFields,
+  );
+  console.log("Зміни в БД");
+
+  switch (change.operationType) {
+    case "delete":
+      console.log("delete :>> ");
+      // io.emit("delete", change);
+      break;
+    case "insert":
+      console.log("insert :>> ");
+      // io.emit("insert", change);
+      handleGameCreate(gameData);
+      break;
+    case "update":
+      const updatedFields = Object.keys(change.updateDescription.updatedFields);
+
+      if (updatedFields.includes("isGameRunning")) {
+        console.log(" updatedFields :>>isGameRunning ");
+        handleNewPlayersOrder();
+      }
+
+      if (updatedFields.includes("players")) {
+        // Перший гравець передається як об'єкт у масиві players:
+        if (Array.isArray(updatedFields.players)) {
+          newPlayer = updatedFields.players.at(-1); // Останній гравець у масиві
+        } else {
+          // Наступні гравці передаються як окремі об'єкти - частинки масиву players, але після ключу "players.1:{}" для другого гравця, "players.2:{} для третього гравця тощо"
+          // Шукаємо поле 'players.X'
+          const playerKey = Object.keys(updatedFields).find(key =>
+            key.startsWith("players."),
+          );
+          if (playerKey) {
+            newPlayer = updatedFields[playerKey];
+          }
+        }
+
+        if (newPlayer) {
+          console.log(`Новий гравець: ${newPlayer.name}`);
+          // Передати `newPlayer` всім клієнтам
+          handleStartOrJoinToGame({
+            gameId: change.documentKey,
+            player: newPlayer,
+          });
+          // io.emit("updateGame", {
+          //   gameId: change.documentKey._id,
+          //   eventType: "PLAYER_JOINED",
+          // });
+        }
+      }
+
+      if (updatedFields.includes("isGameStarted")) {
+        io.emit("updateGame", {
+          gameId: change.documentKey._id,
+          eventType: "GAME_STARTED",
+        });
+      }
+      // io.emit("update", change);
+      break;
+    default:
+      io.emit("unknown", { message: "Unknown DB event" });
+  }
+});
+```

@@ -25,10 +25,10 @@ export const deleteUserFromGame = async ({
     deletedUser.userActiveGameId = null;
     await deletedUser.save();
 
-    // Відправити UserActiveGameId:Update конкретному користувачу
+    // Відправити UserActiveGameId_Updated конкретному користувачу
     const socketId = getUserSocketIds(deletedUserId);
     if (socketId) {
-      io.to(socketId).emit("UserActiveGameId:Update", {
+      io.to(socketId).emit("UserActiveGameId_Updated", {
         userActiveGameId: null,
       });
     } else {

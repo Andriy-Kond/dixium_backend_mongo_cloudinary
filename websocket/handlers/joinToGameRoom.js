@@ -28,8 +28,7 @@ export const joinToGameRoom = async ({ gameId, userId, socket }) => {
     }
 
     // Приєднуємо до кімнати
-    // joinSocketToRoom(socket, gameId, player);
-    socket.join(gameId);
+    socket.join(gameId.toString());
     console.log(`Player ${userId} (socket ${socket.id}) joined room ${gameId}`);
 
     // Повідомляємо клієнту, що він перепідключений

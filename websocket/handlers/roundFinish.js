@@ -35,7 +35,7 @@ export const roundFinish = async ({ updatedGame, socket, io }) => {
       io.to(updatedGame._id).emit("gameEnd", { game });
 
       // Clear userActiveGameId for all players in room (maybe need use it after push some button "Finish" on the client, because it will clear active game from render)
-      io.to(updatedGame._id).emit("UserActiveGameId:Update", {
+      io.to(updatedGame._id).emit("UserActiveGameId_Updated", {
         userActiveGameId: null,
       });
     }

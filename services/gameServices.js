@@ -38,7 +38,6 @@ async function createNewGame(gameData) {
 
 // Перевірка, чи гра існує
 async function findGameByIdOrFail(gameId) {
-  console.log(" findGameByIdOrFail >> gameId:::", gameId);
   console.log("findGameByIdOrFail");
   const game = await Game.findById(gameId);
   if (!game)

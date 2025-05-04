@@ -1,74 +1,82 @@
-import { User } from "../../models/userModel.js";
-import { findGameByIdOrFail } from "../../services/gameServices.js";
-import { socketEmitError } from "../socketEmitError.js";
+// import { User } from "../../models/userModel.js";
+// import { findGameByIdOrFail } from "../../services/gameServices.js";
+// import { socketEmitError } from "../socketEmitError.js";
 
-export const startOrJoinToGame = async ({ gameId, player, socket, io }) => {
-  console.log("startOrJoinToGame");
+// export const startOrJoinToGame = async ({ gameId, player, socket, io }) => {
+//   console.log("startOrJoinToGame");
 
-  try {
-    const { game, errorMessage } = await findGameByIdOrFail(gameId);
-    console.log(" startOrJoinToGame >> errorMessage:::", errorMessage);
-    if (errorMessage) return socketEmitError({ errorMessage, socket });
+//   try {
+//     const { game, errorMessage } = await findGameByIdOrFail(gameId);
+//     if (errorMessage) return socketEmitError({ errorMessage, socket });
 
-    //* If game not started only host can start it
-    if (!game.isGameStarted) {
-      // check if the player is the host
-      if (game.hostPlayerId !== player._id)
-        return socketEmitError({
-          errorMessage: "Game still not started. Only host can start the game",
-          socket,
-        });
+//     //* If game not started only host can start it
+//     if (!game.isGameStarted) {
+//       // check if the player is the host
+//       if (game.hostPlayerId.toString() !== player._id.toString())
+//         return socketEmitError({
+//           errorMessage: "Game still not started. Only host can start the game",
+//           socket,
+//         });
 
-      game.isGameStarted = true;
-      io.emit("Game_Started", { game });
-    }
+//       game.isGameStarted = true;
+//       // await game.save();
 
-    const isPlayerInGame = game.players.some(
-      p => p._id.toString() === player._id.toString(),
-    );
+//       // // Для гравців які знайшли гру, але ще не приєднались, щоб активувалась кнопка "приєднатись до гри" (у v1.0)
+//       // io.emit("Game_Started", { game });
+//     }
 
-    //* Add player to game if he still not in game
-    if (!isPlayerInGame) game.players.push(player);
-    await game.save();
+//     // ===== Приєднання плеєра до гри =====
+//     const isPlayerInGame = game.players.some(
+//       p => p._id.toString() === player._id.toString(),
+//     );
 
-    //* update field userActiveGameId
-    const user = await User.findById(player._id);
-    if (!user) {
-      return socketEmitError({
-        errorMessage: `User with id ${player._id} not found`,
-        socket,
-      });
-    }
-    user.userActiveGameId = gameId;
-    await user.save();
+//     //* Add player to game if he still not in game
+//     if (!isPlayerInGame) game.players.push(player);
+//     await game.save();
 
-    //* Приєдную сокет до кімнати
-    // joinSocketToRoom(socket, gameId, player);
-    socket.join(gameId);
-    console.log(
-      `Player ${player._id} (socket ${socket.id}) joined room ${gameId}`,
-    );
+//     //* update field userActiveGameId
+//     const user = await User.findById(player._id);
+//     if (!user) {
+//       return socketEmitError({
+//         errorMessage: `User with id ${player._id} not found`,
+//         socket,
+//       });
+//     }
+//     user.userActiveGameId = gameId;
+//     await user.save();
 
-    // update game for all users
-    // io.emit("playerStartOrJoinToGame", { game, player });
+//     socket.emit("UserActiveGameId_Updated", {
+//       userActiveGameId: user.userActiveGameId,
+//     });
 
-    //* Notify room
-    io.to(gameId).emit("playerJoined", {
-      game,
-      player,
-      ...(!isPlayerInGame && {
-        message: `Player ${player.name.toUpperCase()} joined to game`,
-      }), // send message only if it first join player to game
-    });
+//     //* Приєдную сокет поточного плеєра до кімнати
+//     // joinSocketToRoom(socket, gameId, player);
+//     // socket.join(gameId);
 
-    socket.emit("UserActiveGameId:Update", {
-      userActiveGameId: user.userActiveGameId,
-    });
-  } catch (err) {
-    console.log("Error start or join to game action:", err);
-    socketEmitError({
-      errorMessage: "Server error: Error start or join to game action",
-      socket,
-    });
-  }
-};
+//     console.log(`Joining room with gameId: ${gameId.toString()}`);
+//     socket.join(gameId.toString());
+//     console.log(`Socket ${socket.id} rooms:`, socket.rooms);
+//     // update game for all users
+//     // io.emit("playerStartOrJoinToGame", { game, player });
+
+//     //* Notify room
+//     console.log(
+//       `Room sockets:`,
+//       io.sockets.adapter.rooms.get(gameId.toString()),
+//     );
+
+//     io.to(gameId).emit("playerJoined", {
+//       game,
+//       player,
+//       ...(!isPlayerInGame && {
+//         message: `Player ${player.name.toUpperCase()} joined to game`,
+//       }), // send message only if it first join player to game
+//     });
+//   } catch (err) {
+//     console.log("Error start or join to game action:", err);
+//     socketEmitError({
+//       errorMessage: "Server error: Error start or join to game action",
+//       socket,
+//     });
+//   }
+// };

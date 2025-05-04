@@ -7,6 +7,7 @@ export const gameDelete = async ({ gameId, userId, socket, io }) => {
 
   try {
     const game = await Game.findByIdAndDelete(gameId);
+
     if (!game)
       return socketEmitError({
         errorMessage: `Game with gameId ${gameId} not found`,
@@ -21,11 +22,11 @@ export const gameDelete = async ({ gameId, userId, socket, io }) => {
       { userActiveGameId: null },
     );
 
-    // delete game for all (if they found it right now for example)
-    io.emit("Game:Deleted", { game }); // send update to all users
-
     // Clear userActiveGameId for all in room
-    io.to(gameId).emit("UserActiveGameId:Update", { userActiveGameId: null });
+    io.to(gameId).emit("UserActiveGameId_Updated", { userActiveGameId: null });
+
+    // delete game for all (if they found it right now for example)
+    io.emit("Game_Deleted", { game }); // send update to all users
 
     // io.to(updatedGame._id).emit("userDeletedFromGame", { game, deletedUser });
   } catch (err) {

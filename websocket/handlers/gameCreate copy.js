@@ -1,6 +1,7 @@
 import { User } from "../../models/userModel.js";
 import { createNewGame } from "../../services/gameServices.js";
 import { socketEmitError } from "../socketEmitError.js";
+import { startOrJoinToGame } from "./startOrJoinToGame.js";
 
 export const gameCreate = async ({ gameData, socket, io }) => {
   console.log("gameCreate");
@@ -20,36 +21,20 @@ export const gameCreate = async ({ gameData, socket, io }) => {
     user.userActiveGameId = game._id;
     await user.save();
 
-    game.isGameStarted = true;
-    game.players.push(user);
-    await game.save();
+    const hostPlayer = {
+      _id: gameData.hostPlayerId,
+      name: gameData.hostPlayerName,
+      hand: [],
+      isGuessed: false,
+      isVoted: false,
+    };
 
+    startOrJoinToGame({ gameId: game._id, player: hostPlayer, socket, io });
+
+    socket.emit("gameCreated", { game }); // send new game to user who created this game
     socket.emit("UserActiveGameId_Updated", {
       userActiveGameId: user.userActiveGameId,
     });
-
-    //* Приєдную сокет поточного плеєра до кімнати
-    const roomId = game._id.toString();
-    console.log(`Joining room with gameId: ${roomId}`);
-    socket.join(roomId);
-    console.log(`Socket ${socket.id} rooms:`, socket.rooms);
-    console.log(
-      `Sockets in room ${roomId}:`,
-      io.sockets.adapter.rooms.get(roomId)?.size || 0,
-    );
-
-    //* Notify room
-    console.log(`Room sockets:`, io.sockets.adapter.rooms.get(roomId));
-
-    console.log(" io.to >> game._id:::", game._id);
-    io.to(game._id).emit("playerJoined", {
-      game,
-      player: user,
-      message: `Player ${user.name.toUpperCase()} joined to game`,
-    });
-
-    socket.emit("gameCreated", { game }); // send new game to user who created this game
-
     // console.log(" gameCreate >> user:::", user);
     // gameCreate >> user::: {
     //   _id: new ObjectId('67fe6ea01bd21e525b20cd38'),
