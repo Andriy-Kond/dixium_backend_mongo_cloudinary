@@ -1,6 +1,6 @@
-const userSocketMap = new Map(); // Мапа гравців - щоб прив'язати user._id -> socket.id
+const userSocketMap = new Map(); // Мапа гравців - щоб прив'язати user._id до socket.id для того щоб надіслати повідомлення конкретному гравцю.
 
-export const getUserSocketIds = userId => userSocketMap.get(userId) || null;
+export const getUserSocketId = userId => userSocketMap.get(userId) || null;
 
 // CONNECTION ==================
 export const registerUserId = (userId, socket) => {

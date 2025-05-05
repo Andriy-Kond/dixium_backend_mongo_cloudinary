@@ -18,7 +18,7 @@ import {
   setNextStoryteller,
   findAndJoinToGame,
 } from "./handlers/index.js";
-import { registerUserId, userDisconnect } from "./socketUtils.js";
+// import { registerUserId, userDisconnect } from "./socketUtils.js";
 export const httpServer = createServer(app);
 export const io = new Server(httpServer, { cors: { origin: "*" } });
 
@@ -31,20 +31,20 @@ app.use((req, res, next) => {
 io.on("connection", socket => {
   console.log(`User connected: ${socket.id}`);
 
-  const handleRegisterUserId = ({ userId }) => {
-    console.log("handleRegisterUserId");
-    if (!userId) {
-      console.log(`Received invalid userId: ${userId}`);
-      return;
-    }
-    registerUserId(userId, socket);
-  };
+  // const handleRegisterUserId = ({ userId }) => {
+  //   console.log("handleRegisterUserId");
+  //   if (!userId) {
+  //     console.log(`Received invalid userId: ${userId}`);
+  //     return;
+  //   }
+  //   registerUserId(userId, socket);
+  // };
 
-  const handleUserDisconnect = () => {
-    console.log("handleUserDisconnect");
-    console.log(`Socket disconnected, socket.id: ${socket.id}`);
-    userDisconnect(socket);
-  };
+  // const handleUserDisconnect = () => {
+  //   console.log("handleUserDisconnect");
+  //   console.log(`Socket disconnected, socket.id: ${socket.id}`);
+  //   userDisconnect(socket);
+  // };
 
   const handleGameUpdateFirstTurn = async ({ updatedGame }) =>
     gameUpdateFirstTurn({ updatedGame, socket });
@@ -100,8 +100,8 @@ io.on("connection", socket => {
 
   // socket.on("startOrJoinToGame", handleStartOrJoinToGame);
   // socket.on("gameFindActive", handleGameFindActive); // пошук гри (активної)
-  socket.on("registerUserId", handleRegisterUserId);
-  socket.on("disconnect", handleUserDisconnect);
+  // socket.on("registerUserId", handleRegisterUserId);
+  // socket.on("disconnect", handleUserDisconnect);
   socket.on("gameUpdateFirstTurn", handleGameUpdateFirstTurn);
   socket.on("Game_Create", handleGameCreate);
   socket.on("deleteUserFromGame", handleDeleteUserFromGame);

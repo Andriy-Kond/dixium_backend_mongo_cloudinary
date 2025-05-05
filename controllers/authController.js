@@ -269,7 +269,7 @@ const login = async (req, res) => {
     token: user.token, // todo прибрати при переході на cookie.
     avatarURL: user.avatarURL,
     playerGameId: user.playerGameId,
-    // userActiveGameId: user.userActiveGameId,
+    userActiveGameId: user.userActiveGameId,
   });
 
   // console.log(" login >> ...user._doc,:::", user._doc);
@@ -381,7 +381,7 @@ const googleLogin = async (req, res) => {
       token: user.token, // todo прибрати при переході на cookie.
       avatarURL: user.avatarURL,
       playerGameId: user.playerGameId,
-      // userActiveGameId: user.userActiveGameId,
+      userActiveGameId: user.userActiveGameId,
     });
   } catch (error) {
     throw HttpError({ status: 401, message: "Invalid Google token" });
@@ -414,7 +414,7 @@ const getCurrentUser = (req, res) => {
     token: req.user.token, // todo прибрати при переході на cookie.
     avatarURL: req.user.avatarURL,
     playerGameId: req.user.playerGameId,
-    // userActiveGameId: req.user.userActiveGameId,
+    userActiveGameId: req.user.userActiveGameId,
   });
 };
 

@@ -61,11 +61,9 @@ export const findAndJoinToGame = async ({
       io.sockets.adapter.rooms.get(roomId)?.size || 0,
     );
 
-    socket.emit("findAndJoinToGame_Success", { game }); // update game for user who sent this request
-
-    //* Notify room
+    //* Notify room for not this user (filter on client)
     console.log(`Room sockets:`, io.sockets.adapter.rooms.get(roomId));
-
+    console.log(" io.to >> roomId:::", roomId);
     io.to(roomId).emit("playerJoined", {
       game,
       player,
@@ -74,28 +72,20 @@ export const findAndJoinToGame = async ({
       }), // send message only if it first join player to game
     });
 
-    // setTimeout(() => {
-    //   console.log(
-    //     `Emitting playerJoined to room ${roomId}: io.to(roomId).emit("playerJoined"`,
-    //   );
-    // }, 100); // Невелика затримка для забезпечення приєднання
-
-    // setTimeout(() => {
-    //   console.log(
-    //     `Emitting playerJoined to room ${roomId}: socket.to(roomId).emit("playerJoined"`,
-    //   );
-    //   socket.to(roomId).emit("playerJoined", {
-    //     game,
-    //     player,
-    //     ...(!isPlayerInGame && {
-    //       message: `Player ${name.toUpperCase()} joined to game. socket.to(roomId)`,
-    //     }),
-    //   });
-    // }, 100);
-
-    socket.emit("UserActiveGameId_Updated", {
-      userActiveGameId: user.userActiveGameId,
+    // test:
+    io.emit("playerJoined_test", {
+      game,
+      player,
+      ...(!isPlayerInGame && {
+        message: `Player ${name.toUpperCase()} joined to game. io.to(roomId)`,
+      }), // send message only if it first join player to game
     });
+
+    socket.emit("findAndJoinToGame_Success", { game }); // update game for user who sent this request
+
+    // socket.emit("UserActiveGameId_Updated", {
+    //   userActiveGameId: user.userActiveGameId,
+    // });
   } catch (err) {
     console.error("Error finding game:", err);
     socketEmitError({

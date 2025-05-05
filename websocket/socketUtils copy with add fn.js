@@ -13,19 +13,18 @@ export const getUserSocketIds = userId => userSocketMap.get(userId) || null;
 // Для роботи з одного пристрою:
 export const registerUserId = (userId, socket) => {
   console.log("registerUserId");
-  for (const [existingUserId, socketId] of userSocketMap.entries()) {
-    if (existingUserId === userId) {
-      userSocketMap.delete(existingUserId);
-      console.log(`Removed old socket mapping for user ${userId}`);
-    }
-  }
+  // Клієнт надсилає свій user._id при підключенні
   userSocketMap.set(userId, socket.id);
   console.log(`Registered user ${userId} with socket ${socket.id}`);
 };
-
 // export const registerUserId = (userId, socket) => {
 //   console.log("registerUserId");
-//   // Клієнт надсилає свій user._id при підключенні
+//   for (const [existingUserId, socketId] of userSocketMap.entries()) {
+//     if (existingUserId === userId) {
+//       userSocketMap.delete(existingUserId);
+//       console.log(`Removed old socket mapping for user ${userId}`);
+//     }
+//   }
 //   userSocketMap.set(userId, socket.id);
 //   console.log(`Registered user ${userId} with socket ${socket.id}`);
 // };
