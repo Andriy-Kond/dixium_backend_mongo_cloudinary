@@ -116,5 +116,5 @@ io.on("connection", socket => {
   socket.on("playerVoting", handleVote);
   socket.on("roundFinish", handleRoundFinish);
   socket.on("startNewRound", handleStartNewRound);
-  socket.on("findAndJoinToGame", handleFindAndJoinToGame); // пошук і приєднання до гри
+  socket.on("findAndJoinToGame_req", handleFindAndJoinToGame); // пошук і приєднання до гри
 });

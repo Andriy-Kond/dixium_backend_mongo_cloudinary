@@ -14,7 +14,7 @@ export const findAndJoinToGame = async ({
   socket,
   io,
 }) => {
-  console.log("findAndJoinToGame");
+  console.log("findAndJoinToGame_req");
   const { _id: playerId, name } = player;
 
   try {

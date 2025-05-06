@@ -31,7 +31,7 @@ export const gameCreate = async ({ gameData, socket, io }) => {
 
     startOrJoinToGame({ gameId: game._id, player: hostPlayer, socket, io });
 
-    socket.emit("gameCreated", { game }); // send new game to user who created this game
+    socket.emit("game_Created", { game }); // send new game to user who created this game
     socket.emit("UserActiveGameId_Updated", {
       userActiveGameId: user.userActiveGameId,
     });

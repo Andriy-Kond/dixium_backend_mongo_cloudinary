@@ -48,7 +48,7 @@ export const gameCreate = async ({ gameData, socket, io }) => {
       message: `Player ${user.name.toUpperCase()} joined to game`,
     });
 
-    socket.emit("gameCreated", { game }); // send new game to user who created this game
+    socket.emit("game_Created", { game }); // send new game to user who created this game
 
     // console.log(" gameCreate >> user:::", user);
     // gameCreate >> user::: {
