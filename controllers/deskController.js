@@ -2,15 +2,14 @@ import { Deck } from "../models/deckModel.js";
 import { tryCatchDecorator } from "../utils/tryCatchDecorator.js";
 
 const getAllDecks = async (req, res) => {
-  // console.log("start getDecks");
+  console.log("start getDecks");
   const decks = await Deck.find();
-  // console.log("getDecks >> decks:::", decks);
 
   res.json(decks);
 };
 
 const getCurrentDeck = async (req, res) => {
-  // console.log("start get current deck");
+  console.log("start get current deck");
   // console.log("req.params :>> ", req.params);
   // console.log(" req.body :>> ", req.body);
 

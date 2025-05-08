@@ -9,6 +9,7 @@ export const gameCreate = async ({ gameData, socket, io }) => {
     // Створити нову гру.
     const { game, errorMessage } = await createNewGame(gameData);
     if (errorMessage) return socketEmitError({ errorMessage, socket });
+    console.log(" gameCreate >> game:::", game.gameName);
 
     const user = await User.findById(gameData.hostPlayerId);
     if (!user)
@@ -30,18 +31,18 @@ export const gameCreate = async ({ gameData, socket, io }) => {
 
     //* Приєдную сокет поточного плеєра до кімнати
     const roomId = game._id.toString();
-    console.log(`Joining room with gameId: ${roomId}`);
+    // console.log(`Joining room with gameId: ${roomId}`);
     socket.join(roomId);
-    console.log(`Socket ${socket.id} rooms:`, socket.rooms);
-    console.log(
-      `Sockets in room ${roomId}:`,
-      io.sockets.adapter.rooms.get(roomId)?.size || 0,
-    );
+    // console.log(`Socket ${socket.id} rooms:`, socket.rooms);
+    // console.log(
+    //   `Sockets in room ${roomId}:`,
+    //   io.sockets.adapter.rooms.get(roomId)?.size || 0,
+    // );
 
     //* Notify room
-    console.log(`Room sockets:`, io.sockets.adapter.rooms.get(roomId));
+    // console.log(`Room sockets:`, io.sockets.adapter.rooms.get(roomId));
 
-    console.log(" io.to >> game._id:::", game._id);
+    // console.log(" io.to >> game._id:::", game._id);
     io.to(game._id).emit("playerJoined", {
       game,
       player: user,

@@ -53,17 +53,17 @@ export const findAndJoinToGame = async ({
 
     //* Приєдную сокет поточного плеєра до кімнати
     const roomId = gameId.toString();
-    console.log(`Joining room with gameId: ${roomId}`);
+    // console.log(`Joining room with gameId: ${roomId}`);
     socket.join(roomId);
-    console.log(`Socket ${socket.id} rooms:`, socket.rooms);
-    console.log(
-      `Sockets in room ${roomId}:`,
-      io.sockets.adapter.rooms.get(roomId)?.size || 0,
-    );
+    // console.log(`Socket ${socket.id} rooms:`, socket.rooms);
+    // console.log(
+    //   `Sockets in room ${roomId}:`,
+    //   io.sockets.adapter.rooms.get(roomId)?.size || 0,
+    // );
 
     //* Notify room for not this user (filter on client)
-    console.log(`Room sockets:`, io.sockets.adapter.rooms.get(roomId));
-    console.log(" io.to >> roomId:::", roomId);
+    // console.log(`Room sockets:`, io.sockets.adapter.rooms.get(roomId));
+    // console.log(" io.to >> roomId:::", roomId);
     io.to(roomId).emit("playerJoined", {
       game,
       player,
