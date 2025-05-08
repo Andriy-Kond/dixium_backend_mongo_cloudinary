@@ -31,6 +31,7 @@ async function createNewGame(gameData) {
   newGame.gameName = generateGameName();
   // newGame.gamePoster = getRandomItem(newGame.deck).public_id;
   newGame.playerGameId = user.playerGameId;
+  newGame.finishPoints = 30;
   await newGame.save();
 
   return { game: newGame };
