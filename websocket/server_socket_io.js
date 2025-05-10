@@ -17,6 +17,7 @@ import {
   startNewRound,
   setNextStoryteller,
   findAndJoinToGame,
+  cardsListUpdate,
 } from "./handlers/index.js";
 // import { registerUserId, userDisconnect } from "./socketUtils.js";
 export const httpServer = createServer(app);
@@ -91,6 +92,9 @@ io.on("connection", socket => {
   const handleFindAndJoinToGame = async ({ searchGameNumber, player }) => {
     findAndJoinToGame({ searchGameNumber, player, socket, io });
   };
+  const handleCardsListUpdate = async ({ updatedGame }) => {
+    cardsListUpdate({ updatedGame, socket, io });
+  };
 
   // const handleStartOrJoinToGame = async ({ gameId, player }) =>
   //   startOrJoinToGame({ gameId, player, socket, io });
@@ -117,4 +121,5 @@ io.on("connection", socket => {
   socket.on("roundFinish", handleRoundFinish);
   socket.on("startNewRound", handleStartNewRound);
   socket.on("findAndJoinToGame_req", handleFindAndJoinToGame); // пошук і приєднання до гри
+  socket.on("CardsList_Update", handleCardsListUpdate);
 });
