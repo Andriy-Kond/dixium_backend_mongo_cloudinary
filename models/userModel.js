@@ -109,7 +109,24 @@ const setNickname = Joi.object({
   nickname: Joi.string().min(3).max(30).required(),
 });
 
-const resendVerification = Joi.object({});
+// const resendVerification = Joi.object({});
+const resendVerification = Joi.object({
+  // email: Joi.string().required(),
+  email: Joi.string().pattern(emailRegExp).required().messages({
+    "string.pattern.base":
+      "Invalid email format. Please provide a valid email address.",
+  }),
+  // email: Joi.string().required().messages({
+  //   "string.pattern.base":
+  //     "Invalid email format. Please provide a valid email address.",
+  // }),
+
+  recaptchaToken: Joi.string().required().messages({
+    "string.empty": "reCAPTCHA token is required",
+  }),
+
+  captchaType: Joi.string().valid("v3", "v2").required(),
+});
 
 const forgotPassword = Joi.object({
   email: Joi.string().required(),

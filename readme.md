@@ -6,6 +6,7 @@
 - `Joi` - Checking request body: schema description language and data validator
 - `multer` - Allows upload files together with fields
 - [`gravatar`](https://www.npmjs.com/package/gravatar) - Generate avatars
+- `axios` - для відправки запитів на google captcha
 
 #### For render to render.com needs add to package.json:
 

@@ -1,21 +1,3 @@
-// const messageOfErrorStatus = status => {
-//   switch (status) {
-//     case 401:
-//       return "Unauthorized";
-
-//     default:
-//       break;
-//   }
-// };
-
-// export const HttpError = ({ status = 500, message = "Server error" }) => {
-//   const error = new Error(message);
-//   error.status = status;
-//   // error.message = messageOfErrorStatus(status);
-
-//   return error;
-// };
-
 const errorMessageList = {
   400: "Bad Request",
   401: "Unauthorized",
@@ -33,3 +15,21 @@ export const HttpError = ({ status = 500, message }) => {
 
   return error;
 };
+
+// const messageOfErrorStatus = status => {
+//   switch (status) {
+//     case 401:
+//       return "Unauthorized";
+
+//     default:
+//       break;
+//   }
+// };
+
+// export const HttpError = ({ status = 500, message = "Server error" }) => {
+//   const error = new Error(message);
+//   error.status = status;
+//   // error.message = messageOfErrorStatus(status);
+
+//   return error;
+// };

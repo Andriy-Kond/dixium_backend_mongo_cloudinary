@@ -3,7 +3,9 @@ import gravatar from "gravatar";
 import path from "path";
 import fs from "fs/promises";
 import bcrypt from "bcrypt";
+import axios from "axios";
 import jwt from "jsonwebtoken";
+
 import { nanoid } from "nanoid";
 
 import { User } from "../models/userModel.js";
@@ -14,7 +16,17 @@ import { generateUniquePlayerGameId } from "../utils/generateUniquePlayerGameId.
 import { sendVerificationEmail } from "../utils/sendVerificationEmail.js";
 import { sendResetPasswordEmail } from "../utils/sendResetPasswordEmail.js";
 
-const { SECRET_KEY = "", GOOGLE_CLIENT_ID = "" } = process.env;
+const {
+  SECRET_KEY = "",
+  GOOGLE_CLIENT_ID = "",
+  NODE_ENV = "",
+  REFRESH_SECRET = "",
+  FRONTEND_URL = "",
+  RECAPTCHA_SECRET_KEY = "",
+  RECAPTCHA_V3_SECRET_KEY = "",
+  RECAPTCHA_V2_SECRET_KEY = "",
+  RECAPTCHA_V2_INVISIBLE_SECRET_KEY = "",
+} = process.env;
 const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 const register = async (req, res) => {
@@ -54,7 +66,7 @@ const register = async (req, res) => {
   // Унікальний номер
   const playerGameId = await generateUniquePlayerGameId();
   const verificationToken = nanoid();
-  const emailVerificationDeadline = new Date(Date.now() + 168 * 60 * 60 * 1000); // 24 години (168 годин)
+  const emailVerificationDeadline = new Date(Date.now() + 168 * 60 * 60 * 1000); // 168 годин
 
   const newUser = await User.create({
     ...req.body,
@@ -83,7 +95,7 @@ const register = async (req, res) => {
   // jwtToken: Значення cookie, у цьому випадку JWT-токен.
   res.cookie("token", jwtToken, {
     httpOnly: true, // Робить cookie недоступним для JavaScript (наприклад, через document.cookie). Захищає від XSS-атак, оскільки зловмисний скрипт не може вкрасти токен.
-    secure: process.env.NODE_ENV === "production", // Використовувати secure у продакшені. Якщо true, cookie надсилається лише через HTTPS
+    secure: NODE_ENV === "production", // Використовувати secure у продакшені. Якщо true, cookie надсилається лише через HTTPS
     // secure: true,
     sameSite: "strict", // Контролює, коли cookie надсилається в запитах:
     // "strict" - Cookie надсилається лише в запитах із того ж сайту (наприклад, якщо користувач переходить за посиланням із вашого домену).
@@ -93,7 +105,7 @@ const register = async (req, res) => {
     maxAge: 23 * 60 * 60 * 1000, // 23 години. Після закінчення цього часу браузер автоматично видаляє cookie
   });
 
-  // const refreshToken = jwt.sign({ id: user._id }, process.env.REFRESH_SECRET, {
+  // const refreshToken = jwt.sign({ id: user._id }, REFRESH_SECRET, {
   //   expiresIn: "7d",
   // });
 
@@ -125,12 +137,12 @@ const register = async (req, res) => {
 
 const verifyEmail = async (req, res) => {
   // якщо у sendVerificationEmail використовувати
-  // verificationLink = `${process.env.FRONTEND_URL}/api/auth/verify-email?token=${verificationToken}`:
+  // verificationLink = `${FRONTEND_URL}/api/auth/verify-email?token=${verificationToken}`:
   // const { token } = req.query;
   // const user = await User.findOne({ verificationToken: token });
 
   // якщо у sendVerificationEmail використовувати
-  // verificationLink = `${process.env.FRONTEND_URL}/api/auth/verify-email/${verificationToken}`:
+  // verificationLink = `${FRONTEND_URL}/api/auth/verify-email/${verificationToken}`:
   const { verificationToken } = req.params;
   const user = await User.findOne({ verificationToken });
 
@@ -148,30 +160,7 @@ const verifyEmail = async (req, res) => {
   });
 
   // res.json({ message: "Email verified successfully" }); // "Email успішно верифіковано"
-  res.redirect(`${process.env.FRONTEND_URL}/login?verified=true`); // перенаправить користувача на цю адресу після успішної верифікації
-};
-
-const resendVerificationEmail = async (req, res) => {
-  const { _id, email, isEmailVerified } = req.user;
-
-  if (isEmailVerified) {
-    throw HttpError({ status: 400, message: "Email already verified" });
-  }
-
-  const verificationToken = nanoid();
-  const emailVerificationDeadline = new Date(Date.now() + 24 * 60 * 60 * 1000);
-
-  await User.findByIdAndUpdate(_id, {
-    verificationToken,
-    emailVerificationDeadline,
-  });
-
-  await sendVerificationEmail({
-    to: email,
-    verificationToken,
-  });
-
-  res.json({ message: "Verification email sent successfully" });
+  res.redirect(`${FRONTEND_URL}/login?verified=true`); // перенаправить користувача на цю адресу після успішної верифікації
 };
 
 // const refreshToken = async (req, res) => {
@@ -190,7 +179,7 @@ const resendVerificationEmail = async (req, res) => {
 //   });
 //   const newRefreshToken = jwt.sign(
 //     { id: user._id },
-//     process.env.REFRESH_SECRET,
+//     REFRESH_SECRET,
 //     {
 //       expiresIn: "7d",
 //     },
@@ -216,6 +205,91 @@ const resendVerificationEmail = async (req, res) => {
 //   res.json({ message: "Токен оновлено" });
 // };
 
+const resendVerificationEmail = async (req, res) => {
+  const { email, recaptchaToken, captchaType } = req.body;
+
+  console.log("resendVerificationEmail - Request body:", {
+    email,
+    captchaType,
+    recaptchaToken,
+  });
+
+  // Вибір секретного ключа залежно від типу CAPTCHA
+  const captchaKey =
+    captchaType === "v2" ? RECAPTCHA_V2_SECRET_KEY : RECAPTCHA_V3_SECRET_KEY;
+
+  if (!captchaKey) {
+    throw HttpError({
+      status: 500,
+      message: "reCAPTCHA secret key not configured",
+    });
+  }
+
+  // Перевірка reCAPTCHA-токена
+  const recaptchaResponse = await axios.post(
+    "https://www.google.com/recaptcha/api/siteverify",
+    null,
+    {
+      params: {
+        secret: captchaKey,
+        response: recaptchaToken,
+      },
+    },
+  );
+  console.log("reCAPTCHA response:", recaptchaResponse.data);
+  const { success, score } = recaptchaResponse.data;
+
+  // Якщо reCAPTCHA v3 не пройшла (score < 0.5), клієнт показує reCAPTCHA v2 (чекбокс).
+  // reCAPTCHA v2 перевіряється лише за success, оскільки вона вже є інтерактивною.
+
+  // Для v2 зазвичай не перевіряється score, оскільки це інтерактивна перевірка.
+  if (!success) {
+    console.log(
+      `reCAPTCHA failed - Success: ${success}, Errors: ${recaptchaResponse.data["error-codes"]}`,
+    );
+    throw HttpError({
+      status: 400,
+      message: "reCAPTCHA verification failed. Please try again.",
+    });
+  }
+
+  // Для reCAPTCHA v3 перевіряємо score, для v2 — лише success
+  if (captchaType === "v3" && score < 1) {
+    // Поріг 0.5 можна налаштувати (0.0–1.0)
+    console.log(`reCAPTCHA V3 failed - Score: ${score}`);
+
+    throw HttpError({
+      status: 400,
+      message: "reCAPTCHA V3 verification failed. Please try again.",
+    });
+  }
+
+  const user = await User.findOne({ email });
+
+  if (!user) throw HttpError({ status: 404, message: "User not found" });
+
+  if (user.isEmailVerified)
+    throw HttpError({ status: 400, message: "Email already verified" });
+
+  // Генерація нового токена та дедлайну
+  const verificationToken = nanoid();
+  const emailVerificationDeadline = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 години
+
+  // Оновлення користувача
+  await User.findByIdAndUpdate(user._id, {
+    verificationToken,
+    emailVerificationDeadline,
+  });
+
+  // Надсилання листа
+  await sendVerificationEmail({
+    to: email,
+    verificationToken,
+  });
+
+  res.json({ message: "Verification email sent successfully" });
+};
+
 const login = async (req, res) => {
   console.log("login");
   const { email, password } = req.body;
@@ -229,6 +303,7 @@ const login = async (req, res) => {
   }
 
   if (!user.isEmailVerified && new Date() > user.emailVerificationDeadline) {
+    console.log("!user.isEmailVerified");
     throw HttpError({
       status: 403,
       message: "Email not verified. Please verify your email.",
@@ -256,7 +331,7 @@ const login = async (req, res) => {
 
   res.cookie("token", jwtToken, {
     httpOnly: true,
-    // secure: process.env.NODE_ENV === "production", // Використовувати secure у продакшені
+    // secure: NODE_ENV === "production", // Використовувати secure у продакшені
     secure: true,
     sameSite: "strict",
     maxAge: 23 * 60 * 60 * 1000, // 23 години
@@ -368,7 +443,7 @@ const googleLogin = async (req, res) => {
 
     res.cookie("token", jwtToken, {
       httpOnly: true,
-      // secure: process.env.NODE_ENV === "production", // Використовувати secure у продакшені
+      // secure: NODE_ENV === "production", // Використовувати secure у продакшені
       secure: true,
       sameSite: "strict",
       maxAge: 23 * 60 * 60 * 1000, // 23 години
@@ -441,7 +516,7 @@ const forgotPassword = async (req, res) => {
   await sendResetPasswordEmail({ to: email, resetToken });
 
   res.json({ message: "Password reset email sent successfully." });
-  res.redirect(`${process.env.FRONTEND_URL}/login?reset=true`);
+  res.redirect(`${FRONTEND_URL}/login?reset=true`);
 };
 
 // скидання паролю
@@ -478,7 +553,7 @@ const logout = async (req, res) => {
   // todo При переході на cookie - видалити токен і на клієнті через .clearCookie:
   // res.clearCookie("token", {
   //   httpOnly: true,
-  //   secure: process.env.NODE_ENV === "production",
+  //   secure: NODE_ENV === "production",
   //   sameSite: "strict",
   // });
 

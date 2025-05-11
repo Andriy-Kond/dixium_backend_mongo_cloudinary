@@ -22,7 +22,8 @@ authRouter.get("/verify-email/:verificationToken", authController.verifyEmail);
 
 authRouter.post(
   "/resend-verification",
-  authenticate,
+  authRateLimiter,
+  // authenticate,
   checkErrorJoiSchemaDecorator(joiUserSchemas.resendVerification),
   authController.resendVerificationEmail,
 );

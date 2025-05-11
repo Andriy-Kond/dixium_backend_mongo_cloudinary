@@ -15,6 +15,7 @@ export const checkErrorJoiSchemaDecorator = schema => {
     const { error } = schema.validate(req.body, { abortEarly: false }); // Показувати всі помилки валідації (наприклад, якщо email і password невірні, показати обидві помилки).
 
     if (error) {
+      console.log("checkErrorJoiSchemaDecorator");
       const errorMessage = error.details
         .map(detail => detail.message)
         .join(", ");

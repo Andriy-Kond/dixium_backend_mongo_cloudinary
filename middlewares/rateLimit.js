@@ -4,7 +4,7 @@ import { HttpError } from "../utils/HttpError.js";
 //^ Middleware для обмеження запитів для ендпоінтів авторизації
 export const authRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // Часовий проміжок (15 хвилин) для відстеження запитів
-  max: 100, // Максимальна кількість запитів (10/100/1000) на IP у проміжку windowMs
+  max: 20, // Максимальна кількість запитів (10/100/1000) на IP у проміжку windowMs
   message: async (req, res) => {
     // Кастомна відповідь із помилкою, використовуючи HttpError.
     throw HttpError({
