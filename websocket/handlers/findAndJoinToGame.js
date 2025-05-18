@@ -29,6 +29,14 @@ export const findAndJoinToGame = async ({
       return;
     }
 
+    // Якщо гра вже запущена, то приєднатись не можна
+    if (game.isGameRunning) {
+      socket.emit("findAndJoinToGame_Success", {
+        message: "This game already started",
+      });
+      return;
+    }
+
     const { _id: gameId } = game;
 
     // ===== Приєднання плеєра до гри =====

@@ -22,10 +22,8 @@ const {
   NODE_ENV = "",
   REFRESH_SECRET = "",
   FRONTEND_URL = "",
-  RECAPTCHA_SECRET_KEY = "",
   RECAPTCHA_V3_SECRET_KEY = "",
   RECAPTCHA_V2_SECRET_KEY = "",
-  RECAPTCHA_V2_INVISIBLE_SECRET_KEY = "",
 } = process.env;
 const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 
@@ -67,6 +65,7 @@ const register = async (req, res) => {
   const playerGameId = await generateUniquePlayerGameId();
   const verificationToken = nanoid();
   const emailVerificationDeadline = new Date(Date.now() + 168 * 60 * 60 * 1000); // 168 годин
+  // const emailVerificationDeadline = new Date(Date.now() + 1 * 60 * 1000); // 1 хвилина
 
   const newUser = await User.create({
     ...req.body,
@@ -254,7 +253,7 @@ const resendVerificationEmail = async (req, res) => {
   }
 
   // Для reCAPTCHA v3 перевіряємо score, для v2 — лише success
-  if (captchaType === "v3" && score < 1) {
+  if (captchaType === "v3" && score < 0.5) {
     // Поріг 0.5 можна налаштувати (0.0–1.0)
     console.log(`reCAPTCHA V3 failed - Score: ${score}`);
 
@@ -274,6 +273,7 @@ const resendVerificationEmail = async (req, res) => {
   // Генерація нового токена та дедлайну
   const verificationToken = nanoid();
   const emailVerificationDeadline = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 години
+  // const emailVerificationDeadline = new Date(Date.now() + 1 * 60 * 1000); // 1 хвилина
 
   // Оновлення користувача
   await User.findByIdAndUpdate(user._id, {
