@@ -16,3 +16,4 @@ export * from "./startNewRound.js";
 export * from "./gameFindActive.js";
 export * from "./findAndJoinToGame.js";
 export * from "./cardsListUpdate.js";
+export * from "./leaveRoom.js";

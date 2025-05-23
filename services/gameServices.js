@@ -20,7 +20,7 @@ async function createNewGame(gameData) {
     playerGameId: user.playerGameId,
   });
 
-  if (activeGame && activeGame.status !== FINISH) {
+  if (activeGame && activeGame.gameStatus !== FINISH) {
     throw HttpError({
       status: 409,
       message: "You already have an active game. Finish or delete it first.",
@@ -29,9 +29,9 @@ async function createNewGame(gameData) {
 
   const newGame = new Game(gameData);
   newGame.gameName = generateGameName();
-  // newGame.gamePoster = getRandomItem(newGame.deck).public_id;
   newGame.playerGameId = user.playerGameId;
   newGame.finishPoints = 30;
+  // newGame.gamePoster = getRandomItem(newGame.deck).public_id;
   await newGame.save();
 
   return { game: newGame };
@@ -65,7 +65,7 @@ async function findGameAndUpdateOrFail(updatedGame) {
 
   if (!game)
     return {
-      errorMessage: `Cannot update game with updatedGame._id ${updatedGame._id}`,
+      errorMessage: `Cannot update game with _id ${updatedGame._id}`,
       // special event for return previous state in event handler on client:
       // socketEmitError({ event, socket });
       // return null;

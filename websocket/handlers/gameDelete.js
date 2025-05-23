@@ -1,12 +1,14 @@
 import { Game } from "../../models/gameModel.js";
 import { User } from "../../models/userModel.js";
+import { FINISH } from "../../utils/generals/constants.js";
 import { socketEmitError } from "../socketEmitError.js";
 
 export const gameDelete = async ({ gameId, userId, socket, io }) => {
   console.log("gameDelete");
 
   try {
-    const game = await Game.findByIdAndDelete(gameId);
+    // const game = await Game.findByIdAndDelete(gameId);
+    const game = await Game.findById(gameId);
 
     if (!game)
       return socketEmitError({
@@ -25,6 +27,8 @@ export const gameDelete = async ({ gameId, userId, socket, io }) => {
     // Clear userActiveGameId for all in room
     io.to(gameId).emit("UserActiveGameId_Updated", { userActiveGameId: null });
 
+    game.gameStatus = FINISH;
+    game.save();
     // delete game for all (if they found it right now for example)
     io.emit("Game_Deleted", { game }); // send update to all users
 

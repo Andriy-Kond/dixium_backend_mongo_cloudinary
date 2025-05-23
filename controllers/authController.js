@@ -272,7 +272,7 @@ const resendVerificationEmail = async (req, res) => {
 
   // Генерація нового токена та дедлайну
   const verificationToken = nanoid();
-  const emailVerificationDeadline = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 години
+  const emailVerificationDeadline = new Date(Date.now() + 84 * 60 * 60 * 1000); // 84 години
   // const emailVerificationDeadline = new Date(Date.now() + 1 * 60 * 1000); // 1 хвилина
 
   // Оновлення користувача

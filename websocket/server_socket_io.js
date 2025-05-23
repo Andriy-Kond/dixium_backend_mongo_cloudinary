@@ -18,6 +18,7 @@ import {
   setNextStoryteller,
   findAndJoinToGame,
   cardsListUpdate,
+  leaveRoom,
 } from "./handlers/index.js";
 // import { registerUserId, userDisconnect } from "./socketUtils.js";
 export const httpServer = createServer(app);
@@ -89,12 +90,13 @@ io.on("connection", socket => {
   const handleStartNewRound = async ({ updatedGame }) =>
     startNewRound({ updatedGame, socket, io });
 
-  const handleFindAndJoinToGame = async ({ searchGameNumber, player }) => {
+  const handleFindAndJoinToGame = async ({ searchGameNumber, player }) =>
     findAndJoinToGame({ searchGameNumber, player, socket, io });
-  };
-  const handleCardsListUpdate = async ({ updatedGame }) => {
+
+  const handleCardsListUpdate = async ({ updatedGame }) =>
     cardsListUpdate({ updatedGame, socket, io });
-  };
+
+  const handleLeaveRoom = async room => leaveRoom({ room, socket, io });
 
   // const handleStartOrJoinToGame = async ({ gameId, player }) =>
   //   startOrJoinToGame({ gameId, player, socket, io });
@@ -122,4 +124,5 @@ io.on("connection", socket => {
   socket.on("startNewRound", handleStartNewRound);
   socket.on("findAndJoinToGame_req", handleFindAndJoinToGame); // пошук і приєднання до гри
   socket.on("CardsList_Update", handleCardsListUpdate);
+  socket.on("leaveRoom", handleLeaveRoom);
 });

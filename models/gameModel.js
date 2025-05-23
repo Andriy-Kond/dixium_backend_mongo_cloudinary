@@ -87,7 +87,7 @@ const GameSchema = new Schema(
     playerGameId: {
       type: Number,
       required: true,
-      unique: true, // Забезпечує, що один гравець може мати лише одну гру
+      // unique: true, // Забезпечує, що один гравець може мати лише одну гру
     },
   },
 

@@ -1,7 +1,6 @@
+import { Game } from "../../models/gameModel.js";
 import { User } from "../../models/userModel.js";
-import { findGameAndUpdateOrFail } from "../../services/gameServices.js";
 import { socketEmitError } from "../socketEmitError.js";
-// import { getUserSocketId } from "../socketUtils.js";
 
 export const deleteUserFromGame = async ({
   updatedGame,
@@ -12,16 +11,26 @@ export const deleteUserFromGame = async ({
   console.log("deleteUserFromGame");
 
   try {
-    const { game, errorMessage } = await findGameAndUpdateOrFail(updatedGame);
-    if (errorMessage) return socketEmitError({ errorMessage, socket });
+    // const { game, errorMessage } = await findGameAndUpdateOrFail(updatedGame);
+    // if (errorMessage) return socketEmitError({ errorMessage, socket });
 
     const deletedUser = await User.findById(deletedUserId);
-    if (!deletedUser) {
-      socketEmitError({
+    if (!deletedUser)
+      return socketEmitError({
         errorMessage: `Can't delete user: user with id ${deletedUserId} not found`,
         socket,
       });
-    }
+
+    const game = await Game.findByIdAndUpdate(updatedGame._id, updatedGame, {
+      new: true,
+    });
+
+    if (!game)
+      return socketEmitError({
+        errorMessage: `Cannot update game with id ${updatedGame._id}`,
+        socket,
+      });
+
     deletedUser.userActiveGameId = null;
     await deletedUser.save();
 
@@ -33,6 +42,16 @@ export const deleteUserFromGame = async ({
     io.to(deletedUserId).emit("UserActiveGameId_Updated", {
       userActiveGameId: null,
     });
+
+    // // Якщо потрібно видалити всіх користувачів із кімнати, можна перебрати всі сокети в цій кімнаті:
+    // const socketsInRoom = io.sockets.adapter.rooms.get(updatedGame._id);
+    // if (socketsInRoom) {
+    //   for (const socketId of socketsInRoom) {
+    //     const socket = io.sockets.sockets.get(socketId);
+    //     socket.leave(updatedGame._id);
+    //   }
+    // }
+
     // const socketId = getUserSocketId(deletedUserId);
     // if (socketId) {
     //   io.to(socketId).emit("UserActiveGameId_Updated", {

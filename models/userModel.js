@@ -69,8 +69,14 @@ const mongooseUserSchema = new Schema(
       // sparse: true, // Дозволяє значення null для не-Google користувачів (щоб уникнути конфліктів унікальності для користувачів без цих полів) - // !НЕ ПРАЦЮЄ
     },
     appleId: { type: String, unique: true },
-    playerGameId: { type: Number, unique: true },
-    userActiveGameId: { type: String, unique: true },
+    playerGameId: {
+      type: Number,
+      // unique: true
+    },
+    userActiveGameId: {
+      type: String,
+      unique: true,
+    },
 
     refreshToken: { type: String, default: null },
     resetToken: { type: String, default: null },

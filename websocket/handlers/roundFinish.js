@@ -11,10 +11,6 @@ export const roundFinish = async ({ updatedGame, socket, io }) => {
     const { game, errorMessage } = await findGameAndUpdateOrFail(updatedGame);
     if (errorMessage) return socketEmitError({ errorMessage, socket });
 
-    io.to(updatedGame._id).emit(event, { game });
-
-    console.log(" roundFinish >> game:::", game.scores);
-
     // Is we can to finish the game?
     const maxScore = Math.max(...game.scores.values());
     console.log(" roundFinish >> maxScore:::", maxScore);
@@ -38,6 +34,8 @@ export const roundFinish = async ({ updatedGame, socket, io }) => {
       io.to(updatedGame._id).emit("UserActiveGameId_Updated", {
         userActiveGameId: null,
       });
+    } else {
+      io.to(updatedGame._id).emit(event, { game });
     }
   } catch (err) {
     console.error("Error in handling current game run:", err);
