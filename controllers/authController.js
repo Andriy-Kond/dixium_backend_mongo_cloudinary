@@ -34,7 +34,8 @@ const {
 const googleClient = new OAuth2Client(
   GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET,
-  "http://localhost:3000", // Redirect URI
+  "https://dixium.vercel.app", // Redirect URI
+  // "http://localhost:3000", // Redirect URI
 );
 
 const register = async (req, res) => {
