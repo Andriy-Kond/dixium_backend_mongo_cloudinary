@@ -19,7 +19,6 @@ import { sendResetPasswordEmail } from "../utils/sendResetPasswordEmail.js";
 const {
   SECRET_KEY = "",
   GOOGLE_CLIENT_ID = "",
-  GOOGLE_CLIENT_ID2 = "",
   GOOGLE_CLIENT_SECRET = "",
   NODE_ENV = "",
   REFRESH_SECRET = "",
