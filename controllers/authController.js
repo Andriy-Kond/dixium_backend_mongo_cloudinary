@@ -19,13 +19,24 @@ import { sendResetPasswordEmail } from "../utils/sendResetPasswordEmail.js";
 const {
   SECRET_KEY = "",
   GOOGLE_CLIENT_ID = "",
+  GOOGLE_CLIENT_ID2 = "",
+  GOOGLE_CLIENT_SECRET = "",
   NODE_ENV = "",
   REFRESH_SECRET = "",
   FRONTEND_URL = "",
   RECAPTCHA_V3_SECRET_KEY = "",
   RECAPTCHA_V2_SECRET_KEY = "",
 } = process.env;
-const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
+
+//# Передача token:
+// const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
+
+//# Передача code замість token:
+const googleClient = new OAuth2Client(
+  GOOGLE_CLIENT_ID,
+  GOOGLE_CLIENT_SECRET,
+  "http://localhost:3000", // Redirect URI
+);
 
 const register = async (req, res) => {
   console.log("register >>>");
@@ -383,12 +394,31 @@ const googleLogin = async (req, res) => {
   // Якщо користувач із таким email уже є (наприклад, через email-авторизацію), пов'язує googleId.
   // Якщо користувача немає, створює нового з даними від Google.
   // Генерує JWT-токен, як і для email-авторизації.
-  const { token } = req.body;
+  const { code, token } = req.body;
+  console.log({ code, token });
+
+  let ticket;
   try {
-    const ticket = await googleClient.verifyIdToken({
-      idToken: token,
-      audience: GOOGLE_CLIENT_ID,
-    });
+    if (code) {
+      //# Передача code замість token:
+      // Обмінюємо код авторизації на токени
+      const { tokens } = await googleClient.getToken(code);
+      console.log("googleLogin - Tokens:", tokens);
+
+      // Перевіряємо ID Token
+      ticket = await googleClient.verifyIdToken({
+        idToken: tokens.id_token,
+        audience: GOOGLE_CLIENT_ID,
+      });
+    } else {
+      //# Передача token:
+      ticket = await googleClient.verifyIdToken({
+        idToken: token,
+        audience: GOOGLE_CLIENT_ID,
+      });
+    }
+
+    console.log("googleLogin - Ticket payload:", ticket.getPayload());
     const payload = ticket.getPayload();
     // console.log(" googleLogin >> payload:::", payload);
     //  googleLogin >> payload::: {
@@ -441,13 +471,13 @@ const googleLogin = async (req, res) => {
     user.token = jwtToken;
     await user.save();
 
-    res.cookie("token", jwtToken, {
-      httpOnly: true,
-      // secure: NODE_ENV === "production", // Використовувати secure у продакшені
-      secure: true,
-      sameSite: "strict",
-      maxAge: 23 * 60 * 60 * 1000, // 23 години
-    });
+    // res.cookie("token", jwtToken, {
+    //   httpOnly: true,
+    //   // secure: NODE_ENV === "production", // Використовувати secure у продакшені
+    //   secure: true,
+    //   sameSite: "strict",
+    //   maxAge: 23 * 60 * 60 * 1000, // 23 години
+    // });
 
     res.json({
       _id: user._id,
@@ -459,6 +489,7 @@ const googleLogin = async (req, res) => {
       userActiveGameId: user.userActiveGameId,
     });
   } catch (error) {
+    console.error("googleLogin - Error:", error);
     throw HttpError({ status: 401, message: "Invalid Google token" });
   }
 };
