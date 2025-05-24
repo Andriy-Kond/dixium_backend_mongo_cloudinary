@@ -389,6 +389,8 @@ const setNickname = async (req, res) => {
 
 const googleLogin = async (req, res) => {
   console.log("googleLogin");
+  console.log("googleClient.redirectUri", googleClient.redirectUri);
+
   // Перевіряє Google-токен.
   // Шукає користувача за googleId або email.
   // Якщо користувач із таким email уже є (наприклад, через email-авторизацію), пов'язує googleId.
