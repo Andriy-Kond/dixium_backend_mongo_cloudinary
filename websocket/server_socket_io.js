@@ -111,7 +111,7 @@ io.on("connection", socket => {
   socket.on("gameUpdateFirstTurn", handleGameUpdateFirstTurn);
   socket.on("Game_Create", handleGameCreate);
   socket.on("deleteUserFromGame", handleDeleteUserFromGame);
-  socket.on("gameRun", handleGameRun);
+  socket.on("Game_Run", handleGameRun);
   socket.on("Game_Delete", handleGameDelete);
   socket.on("joinToGameRoom", handleJoinToGameRoom);
   socket.on("newPlayersOrder", handleNewPlayersOrder);

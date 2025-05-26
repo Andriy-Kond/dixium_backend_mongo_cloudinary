@@ -1,4 +1,4 @@
-import { findGameAndUpdateOrFail } from "../../services/gameServices.js";
+import { Game } from "../../models/gameModel.js";
 import { socketEmitError } from "../socketEmitError.js";
 
 export const gameRun = async ({ updatedGame, socket, io }) => {
@@ -14,10 +14,18 @@ export const gameRun = async ({ updatedGame, socket, io }) => {
   }
 
   try {
-    const { game, errorMessage } = await findGameAndUpdateOrFail(updatedGame);
-    if (errorMessage) {
+    const game = await Game.findByIdAndUpdate(updatedGame._id, updatedGame, {
+      new: true,
+    });
+
+    if (!game) {
       socket.emit(event, { updatedGame, message: errorMessage }); // send OLD game!
-      return socketEmitError({ errorMessage, socket });
+      // special event for return previous state in event handler on client:
+
+      return socketEmitError({
+        errorMessage: `Cannot update game with _id ${updatedGame._id}`,
+        socket,
+      });
     }
 
     io.emit(event, { game }); // to all, for disable button "join to game"

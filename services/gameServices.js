@@ -46,8 +46,7 @@ async function findGameByIdOrFail(gameId) {
       errorMessage: `Error: The game with id ${gameId} not found!`,
     };
 
-  // todo: add isGameFinished
-  if (game.isGameFinished)
+  if (game.status === FINISH)
     return {
       errorMessage: `Game with id ${gameId} already finish`,
     };

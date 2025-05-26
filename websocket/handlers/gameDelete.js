@@ -9,7 +9,6 @@ export const gameDelete = async ({ gameId, userId, socket, io }) => {
   try {
     // const game = await Game.findByIdAndDelete(gameId);
     const game = await Game.findById(gameId);
-
     if (!game)
       return socketEmitError({
         errorMessage: `Game with gameId ${gameId} not found`,

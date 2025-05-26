@@ -20,6 +20,8 @@ const GameSchema = new Schema(
       default: LOBBY,
     },
 
+    currentRoundNumber: Number, // 0
+
     isGameRunning: Boolean, // game started and running (players can't join anymore)
     isGameStarted: Boolean, // game started but not running (players can join)
     isFirstTurn: Boolean,
@@ -29,7 +31,6 @@ const GameSchema = new Schema(
     hostPlayerId: String, // id творця гри
     hostPlayerName: String, // Ім'я творця гри
     storytellerId: String, // ID гравця, який зараз розповідає (той, хто робить перший хід)
-    currentRound: Number, // 0
 
     cardsOnTable: [
       {
