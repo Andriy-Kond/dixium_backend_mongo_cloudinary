@@ -1,6 +1,11 @@
 import nodemailer from "nodemailer";
 
-const { EMAIL_HOST, EMAIL_USER, EMAIL_PASS, FRONTEND_URL } = process.env;
+const {
+  EMAIL_HOST,
+  EMAIL_USER,
+  EMAIL_PASS,
+  FRONTEND_URL, // DEV:http://localhost:3000 , DEPLOY: dixium.vercel.app
+} = process.env;
 
 const transporter = nodemailer.createTransport({
   host: EMAIL_HOST,

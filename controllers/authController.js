@@ -22,7 +22,8 @@ const {
   GOOGLE_CLIENT_SECRET = "",
   NODE_ENV = "",
   REFRESH_SECRET = "",
-  FRONTEND_URL = "",
+  FRONTEND_URL = "", // DEV:http://localhost:3000 , DEPLOY: dixium.vercel.app
+
   RECAPTCHA_V3_SECRET_KEY = "",
   RECAPTCHA_V2_SECRET_KEY = "",
 } = process.env;
@@ -34,8 +35,7 @@ const {
 const googleClient = new OAuth2Client(
   GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET,
-  "https://dixium.vercel.app", // Redirect URI
-  // "http://localhost:3000", // Redirect URI
+  GOOGLE_REDIRECT_URI, // DEV: "http://localhost:3000", DEPLOY: https://dixium.vercel.app
 );
 
 const register = async (req, res) => {
