@@ -26,6 +26,7 @@ const {
 
   RECAPTCHA_V3_SECRET_KEY = "",
   RECAPTCHA_V2_SECRET_KEY = "",
+  GOOGLE_REDIRECT_URI,
 } = process.env;
 
 //# Передача token:
