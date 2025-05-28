@@ -19,6 +19,7 @@ import {
   findAndJoinToGame,
   cardsListUpdate,
   leaveRoom,
+  userActiveGameIdClear,
 } from "./handlers/index.js";
 // import { registerUserId, userDisconnect } from "./socketUtils.js";
 export const httpServer = createServer(app);
@@ -97,6 +98,9 @@ io.on("connection", socket => {
     cardsListUpdate({ updatedGame, socket, io });
 
   const handleLeaveRoom = async room => leaveRoom({ room, socket, io });
+  const handleUserActiveGameIdClear = async ({ userId }) => {
+    userActiveGameIdClear({ userId, socket });
+  };
 
   // const handleStartOrJoinToGame = async ({ gameId, player }) =>
   //   startOrJoinToGame({ gameId, player, socket, io });
@@ -125,4 +129,5 @@ io.on("connection", socket => {
   socket.on("findAndJoinToGame_req", handleFindAndJoinToGame); // пошук і приєднання до гри
   socket.on("CardsList_Update", handleCardsListUpdate);
   socket.on("leaveRoom", handleLeaveRoom);
+  socket.on("UserActiveGameId_Clear", handleUserActiveGameIdClear);
 });
