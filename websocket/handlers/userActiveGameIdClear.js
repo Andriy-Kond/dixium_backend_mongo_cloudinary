@@ -15,7 +15,7 @@ export const userActiveGameIdClear = async ({ userId, socket }) => {
       });
 
     user.userActiveGameId = null;
-    user.save();
+    await user.save();
 
     // Clear userActiveGameId for all in room
     socket.emit("UserActiveGameId_Updated", { userActiveGameId: null });

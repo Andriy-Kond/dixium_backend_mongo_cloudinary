@@ -27,7 +27,7 @@ export const gameDelete = async ({ gameId, userId, socket, io }) => {
     io.to(gameId).emit("UserActiveGameId_Updated", { userActiveGameId: null });
 
     game.gameStatus = FINISH;
-    game.save();
+    await game.save();
     // delete game for all (if they found it right now for example)
     io.emit("Game_Deleted", { game }); // send update to all users
 

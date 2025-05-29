@@ -80,15 +80,6 @@ export const findAndJoinToGame = async ({
       }), // send message only if it first join player to game
     });
 
-    // test:
-    io.emit("playerJoined_test", {
-      game,
-      player,
-      ...(!isPlayerInGame && {
-        message: `Player ${name.toUpperCase()} joined to game. io.to(roomId)`,
-      }), // send message only if it first join player to game
-    });
-
     socket.emit("findAndJoinToGame_Success", { game }); // update game for user who sent this request
 
     // socket.emit("UserActiveGameId_Updated", {

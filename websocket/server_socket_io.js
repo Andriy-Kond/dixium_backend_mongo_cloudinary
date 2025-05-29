@@ -20,6 +20,7 @@ import {
   cardsListUpdate,
   leaveRoom,
   userActiveGameIdClear,
+  setFinishPoints,
 } from "./handlers/index.js";
 // import { registerUserId, userDisconnect } from "./socketUtils.js";
 export const httpServer = createServer(app);
@@ -102,6 +103,10 @@ io.on("connection", socket => {
     userActiveGameIdClear({ userId, socket });
   };
 
+  const handleSetFinishPoints = async ({ gameId, finishPoints }) => {
+    setFinishPoints({ gameId, finishPoints, socket });
+  };
+
   // const handleStartOrJoinToGame = async ({ gameId, player }) =>
   //   startOrJoinToGame({ gameId, player, socket, io });
 
@@ -130,4 +135,5 @@ io.on("connection", socket => {
   socket.on("CardsList_Update", handleCardsListUpdate);
   socket.on("leaveRoom", handleLeaveRoom);
   socket.on("UserActiveGameId_Clear", handleUserActiveGameIdClear);
+  socket.on("Set_Finish_Points", handleSetFinishPoints);
 });

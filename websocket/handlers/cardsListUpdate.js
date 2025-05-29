@@ -14,7 +14,7 @@ export const cardsListUpdate = async ({ updatedGame, socket, io }) => {
         socket,
       });
     game.deck = updatedGame.deck;
-    game.save();
+    await game.save();
 
     io.to(updatedGame._id).emit(event, { game });
   } catch (err) {

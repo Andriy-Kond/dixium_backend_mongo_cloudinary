@@ -18,3 +18,4 @@ export * from "./findAndJoinToGame.js";
 export * from "./cardsListUpdate.js";
 export * from "./leaveRoom.js";
 export * from "./userActiveGameIdClear.js";
+export * from "./setFinishPoints.js";
