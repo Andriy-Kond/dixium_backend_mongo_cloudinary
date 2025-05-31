@@ -14,9 +14,8 @@ export const generateUniquePlayerGameId = async () => {
   while (!isUnique) {
     playerGameId = Math.floor(Math.random() * (maxId - minId + 1)) + minId;
     const existingUser = await User.findOne({ playerGameId });
-    if (!existingUser) {
-      isUnique = true;
-    }
+
+    if (!existingUser) isUnique = true;
   }
 
   return playerGameId;
